@@ -29,7 +29,7 @@ task :clobber do
 end
 
 DockerUser = "robertfeldt"
-DockerImageName = "sdist"
+DockerImageName = "mdist"
 Tag = "0.1.0"
 
 StartTime = Time.now
@@ -71,7 +71,7 @@ desc "Build docker image"
 task :build_docker_image do
   save_version()
 
-  docker_build_image("docker/sdist.Dockerfile",
+  docker_build_image("docker/mdist.Dockerfile",
     DockerUser, DockerImageName, Tag
   )
 end
@@ -101,9 +101,9 @@ task :rmallnone do
   end
 end
 
-desc "Run sdist in the built docker image"
+desc "Run mdist in the built docker image"
 task :rundbr do
-  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} julia /usr/src/sdist/bin/sdist"
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} julia /usr/src/MultiDistances/bin/mdist"
 end
 
 desc "Clean docker build"
