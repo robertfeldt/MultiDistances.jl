@@ -1,0 +1,182 @@
+#!/usr/bin/env julia
+using ArgParse
+
+function exiterror(str)
+    println(str)
+    exit(-1)
+end
+
+function parse_args(args)
+
+    # initialize the settings (the description is for the help screen)
+    s = ArgParseSettings(description = "sdist - string distance calculator")
+
+    @add_arg_table s begin
+        "--distance", "-d"
+            help = "distance function(s) to use"
+            default = "levenshtein"
+        "-q"
+            help = "q-gram length"
+            arg_type = Int
+            required = false
+            default = 2
+        "--modifier"
+            help = "Distance modifier"
+            arg_type = String
+            required = false
+        "--verbose"
+            help = "verbose during processing"
+            action = :store_true
+        "dirOrFile1"
+            help = "directory or first file"
+            required = true
+        "file2"
+            help = "second file"
+            required = false
+    end
+
+    pargs = ArgParse.parse_args(args, s) # the result is a Dict{String,Any}
+
+    if pargs["file2"] == nothing
+        dirpath = pargs["dirOrFile1"]
+        if !isdir(dirpath)
+            error("Only one argument and it is not a directory! ($dirpath)")
+        end
+        pargs["type"] = "directory"
+        pargs["directory"] = dirpath
+    else
+        file1 = pargs["dirOrFile1"]
+        file2 = pargs["file2"]
+        if !isfile(file1)
+            exiterror("First argument ($file1) is not a file!")
+        elseif !isfile(file2)
+            exiterror("First argument ($file2) is not a file!")
+        end
+        pargs["type"] = "files"
+        pargs["file1"] = file1
+        pargs["file2"] = file2
+    end
+
+    if pargs["verbose"]
+        println("Parsed args:")
+        for (key,val) in pargs
+            println("  $key  =>  $(repr(val))")
+        end
+    end
+
+    pargs
+end
+
+pargs = parse_args(ARGS)
+
+#include("../src/MultiDistances.jl")
+using MultiDistances
+using StringDistances
+
+# Given a q-gram length q return the string distance to use. Note that
+# many of them don't care about q.
+DistancesFn = Dict(
+    "levenshtein" => (q) -> Levenshtein(),
+    "jaro" => (q) -> Jaro(),
+    "hamming" => (q) -> Hamming(),
+
+    "qgram" => (q) -> QGram(q),
+    "cosine" => (q) -> Cosine(q),
+    "jaccard" => (q) -> Jaccard(q),
+    "overlap" => (q) -> Overlap(q),
+    "sorensendice" => (q) -> SorensenDice(q),
+    "sorensen-dice" => (q) -> SorensenDice(q),
+
+    "ratcliffobershelp" => (q) -> RatcliffObershelp(),
+    "ratcliff-obershelp" => (q) -> RatcliffObershelp(),
+
+    # Note that NCD compressors cannot be modified!
+    "ncd-zlib" => (q) -> NCD(ZlibCompressor),
+    "ncd-xz" => (q) -> NCD(XzCompressor),
+    "ncd-zstd" => (q) -> NCD(ZstdCompressor),
+    "ncd-bzip2" => (q) -> NCD(Bzip2Compressor),
+    "ncd" => (q) -> NCD(Bzip2Compressor), # We use bzip2 as the default since it handles shorter strings better
+)
+
+function can_be_modified(d)
+    typeof(d) != NCD
+end
+
+DistanceModifierFn = Dict(
+    "winkler" => (d) -> Winkler(d),
+    "partial" => (d) -> Partial(d),
+    "tokensort" => (d) -> TokenSort(d),
+    "tokenset" => (d) -> TokenSet(d),
+    "tokenmax" => (d) -> TokenMax(d),
+)
+
+function get_distance(distdescription, q = 2, verbose = false, 
+    modifierdescription = nothing)
+    if haskey(DistancesFn, distdescription)
+        dist = DistancesFn[distdescription](q)
+    else
+        # Use Levenshtein matching on the keys to try and find the closest
+        # one and then assume it is that one.
+        dd = MultiDistances.find_most_similar(distdescription, collect(keys(DistancesFn)))
+        if verbose
+            println("No distance named $distdescription. Fuzzy matching found $dd")
+        end
+        dist = DistancesFn[dd](q)
+    end
+
+    if modifierdescription != nothing && can_be_modified(dist)
+        md = MultiDistances.find_most_similar(modifierdescription, 
+                collect(keys(DistanceModifierFn)))
+        if verbose
+            println("Using modifier $md.")
+        end
+        dist = DistanceModifierFn[md](dist)
+    end
+
+    dist
+end
+
+function write_float_matrix_to_csv(csvfile::String, m::Matrix{Float64}, names::Vector{String})
+    open(csvfile, "w") do fh
+        println(fh, "," * join(names, ","))
+        for i in 1:size(m, 1)
+            print(fh, names[i])
+            for j in 1:size(m, 2)
+                print(fh, "," * string(m[i, j]))
+            end
+            if i < size(m, 1)
+                print(fh, "\n")
+            end
+        end
+    end
+end
+
+function main(pargs)
+    distance = get_distance(pargs["distance"], pargs["q"], 
+        pargs["verbose"], pargs["modifier"])
+    if pargs["type"] == "files"
+
+        f1 = pargs["file1"]
+        f2 = pargs["file2"]
+        distval = MultiDistances.file_distance(distance, f1, f2)
+
+        if pargs["verbose"]
+            println("Distance is: $distval")
+        else
+            println(distval)
+        end
+
+    else pargs["type"] == "directory"
+
+        dir = pargs["directory"]
+        filenames = sort(readdir(dir))
+        filecontents = map(f -> read(joinpath(dir, f), String), filenames)
+        dm = MultiDistances.distance_matrix(distance, filecontents)
+        write_float_matrix_to_csv("distances.csv", dm, filenames)
+
+    end
+
+    exit(0)
+end
+
+main(pargs)

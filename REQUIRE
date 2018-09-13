@@ -1,0 +1,7 @@
+julia 1.0
+ArgParse
+StringDistances
+CodecZlib
+CodecXz
+CodecZstd
+CodecBzip2
