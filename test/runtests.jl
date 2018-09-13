@@ -1,4 +1,5 @@
 using Test
+using MultiDistances
 
 @testset "MultiDistances test suite" begin
 

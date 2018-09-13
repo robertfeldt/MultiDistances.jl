@@ -1,7 +1,7 @@
-module ManyDistances
+module MultiDistances
 
 import StringDistances: PreMetric, compare, evaluate
-using CodecZlib, CodecXz, CodecZstd, CodecBzip2
+import CodecZlib, CodecXz, CodecZstd, CodecBzip2
 
 export file_distance, file_similarity,
        NCD, ZlibCompressor, evaluate, compare

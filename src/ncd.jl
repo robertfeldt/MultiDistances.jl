@@ -6,7 +6,7 @@ function lexsortmerge(s1::AbstractString, s2::AbstractString)
     (s1 < s2) ? (s1 * s2) : (s2 * s1)
 end
 
-abstract type CompressionDistance <: StringDistances.PreMetric
+abstract type CompressionDistance <: PreMetric end
 
 struct NCD <: CompressionDistance
     compressor
