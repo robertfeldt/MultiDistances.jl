@@ -9,7 +9,7 @@ function file_distance(distance, file1, file2)
 end
 
 function find_most_similar(query::S, 
-    strings::Vector{S}, distance = StringDistances.Levenshtein()) where {S<:AbstractString}
+    strings::Vector{S}, distance = Levenshtein()) where {S<:AbstractString}
 
     similarities = map(s -> compare(distance, s, query), strings)
     strings[last(findmax(similarities))]
