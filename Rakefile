@@ -106,9 +106,11 @@ task :rundbr do
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} julia /usr/src/MultiDistances/bin/mdist"
 end
 
-desc "Test docker image by calculating full distance matrix from the test data files"
-task :distmtest do
-  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} julia /usr/src/MultiDistances/bin/mdist --distance ncd-bzip2 --verbose test/data"
+desc "Test docker image"
+task :dockertest do
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-bzip2 --verbose distances test/data"
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance jaccard --verbose dist test/data/martha.txt test/data/marhta.txt"
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance levenshtein --verbose query test/data/martha.txt test/data"
 end
 
 desc "Clean docker build"
