@@ -1,5 +1,3 @@
-# mdist
-
 Simple command line interface to calculate distances between files. Include a large number of distance functions, both classical ones (Levenshtein, Q-Grams etc) and compression based ones (NCD based on different compressors).
 
 ## Installation
