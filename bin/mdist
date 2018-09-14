@@ -20,6 +20,10 @@ function parse_args(args)
             arg_type = Int
             required = false
             default = 2
+        "--compression-level", "-l"
+            help = "compression level"
+            arg_type = Int
+            required = false
         "--modifier"
             help = "Distance modifier"
             arg_type = String
@@ -84,30 +88,36 @@ pargs = parse_args(ARGS)
 using MultiDistances
 using StringDistances
 
+q(args) = get(args, "q", 2)
+lvl(args, lo, default, hi) = clamp(get(args, "compression-level", default), lo, hi)
+
 # Given a q-gram length q return the string distance to use. Note that
 # many of them don't care about q.
 DistancesFn = Dict(
-    "levenshtein" => (q) -> Levenshtein(),
-    "jaro" => (q) -> Jaro(),
-    "hamming" => (q) -> Hamming(),
+    # Edit dist funcs don't care about q or level (l)
+    "levenshtein" => (a) -> Levenshtein(),
+    "jaro" => (a) -> Jaro(),
+    "hamming" => (a) -> Hamming(),
 
-    "qgram" => (q) -> QGram(q),
-    "cosine" => (q) -> Cosine(q),
-    "jaccard" => (q) -> Jaccard(q),
-    "overlap" => (q) -> Overlap(q),
-    "sorensendice" => (q) -> SorensenDice(q),
+    "ratcliffobershelp" => (a) -> RatcliffObershelp(),
+    "ratcliff-obershelp" => (a) -> RatcliffObershelp(),
 
-    "ratcliffobershelp" => (q) -> RatcliffObershelp(),
-    "ratcliff-obershelp" => (q) -> RatcliffObershelp(),
+    # Qgram dist funcs only care about q but not level (l)
+    "qgram" => (a) -> QGram(q(a)),
+    "cosine" => (a) -> Cosine(q(a)),
+    "jaccard" => (a) -> Jaccard(q(a)),
+    "overlap" => (a) -> Overlap(q(a)),
+    "sorensendice" => (a) -> SorensenDice(q(a)),
 
+    # NCD dist funcs. Some care about level (l) but none about q.
     # Note that NCD compressors cannot be modified with Winkler, Partial et al.
-    "ncd-zlib" => (q) -> NCD(ZlibCompressor),
-    "ncd-gzip" => (q) -> NCD(GzipCompressor),
-    "ncd-deflate" => (q) -> NCD(DeflateCompressor),
-    "ncd-xz" => (q) -> NCD(XzCompressor),
-    "ncd-zstd" => (q) -> NCD(ZstdCompressor),
-    "ncd-bzip2" => (q) -> NCD(Bzip2Compressor),
-    "ncd" => (q) -> NCD(Bzip2Compressor), # We use bzip2 as the default since it handles shorter strings better
+    "ncd-zlib" => (a) -> NCD(ZlibCompressor),
+    "ncd-gzip" => (a) -> NCD(GzipCompressor),
+    "ncd-deflate" => (a) -> NCD(DeflateCompressor),
+    "ncd-xz" => (a) -> NCD(XzCompressor(; level = lvl(a, 1, 6, 9))),
+    "ncd-zstd" => (a) -> NCD(ZstdCompressor(; level = lvl(a, 1, 3, 19))),
+    "ncd-bzip2" => (a) -> NCD(Bzip2Compressor(; workfactor = lvl(a, 0, 30, 250))),
+    "ncd" => (a) -> NCD(Bzip2Compressor), # We use bzip2 as the default since it seems to handle shorter strings better
 )
 
 QgramDistances = String["qgram", "cosine", "jaccard", "overlap", "sorensendice"]
@@ -146,10 +156,15 @@ if pargs["%COMMAND%"] == "distfuncs"
     exit(0)
 end
 
-function get_distance(distdescription, q = 2, verbose = false, 
-    modifierdescription = nothing)
+# Create a distance object from the arguments
+function create_distance(args)
+
+    distdescription = args["distance"]
+    verbose = args["verbose"]
+    modifierdescription = get(args, "modifier", nothing)
+
     if haskey(DistancesFn, distdescription)
-        dist = DistancesFn[distdescription](q)
+        dist = DistancesFn[distdescription](args)
     else
         # Use Levenshtein matching on the keys to try and find the closest
         # one and then assume it is that one.
@@ -157,7 +172,7 @@ function get_distance(distdescription, q = 2, verbose = false,
         if verbose
             println("No distance named $distdescription. Fuzzy matching found $dd")
         end
-        dist = DistancesFn[dd](q)
+        dist = DistancesFn[dd](args)
     end
 
     if modifierdescription != nothing && can_be_modified(dist)
@@ -193,13 +208,17 @@ function distmatrix_filename(distance, prefix = "distances_", postfix = ".csv")
     dn = replace(dn, ")" => "_")
     dn = replace(dn, "{" => "_")
     dn = replace(dn, "}" => "_")
+    dn = replace(dn, "=" => "")
+    dn = replace(dn, r", ?" => "_")
     timestamp = Libc.strftime("_%Y%m%d_%H%M%S", time())
-    prefix * dn * timestamp * postfix
+    name = prefix * dn * timestamp * postfix
+    # Ensure not multiple underscores in sequence
+    replace(name, r"_+" => "_")
 end
 
 function main(pargs)
-    distance = get_distance(pargs["distance"], pargs["q"], 
-        pargs["verbose"], pargs["modifier"])
+    distance = create_distance(pargs)
+
     if pargs["%COMMAND%"] == "dist"
 
         f1 = pargs["dist"]["file1"]
