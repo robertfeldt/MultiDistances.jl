@@ -27,44 +27,50 @@ function parse_args(args)
         "--verbose"
             help = "verbose during processing"
             action = :store_true
-        "dirOrFile1"
-            help = "directory or first file"
+        "distfuncs"
+            help = "list all available distance functions"
+            action = :command
+        "distances"
+            help = "calculate distances of a set of files in a dir"
+            action = :command
+        "dist"
+            help = "calculate distance between two files"
+            action = :command
+        "query"
+            help = "find the most similar and distant files given a query file"
+            action = :command
+    end
+
+    @add_arg_table s["distances"] begin
+        "dir"
+            help = "directory with files to calculate distances of"
+            required = true
+    end
+
+    @add_arg_table s["dist"] begin
+        "file1"
+            help = "first file"
             required = true
         "file2"
             help = "second file"
+            required = true
+    end
+
+    @add_arg_table s["query"] begin
+        "-n"
+            help = "How many most similar/distant files to list"
+            arg_type = Int
             required = false
+            default = 7
+        "file"
+            help = "file to compare"
+            required = true
+        "dir"
+            help = "set of files to compare to"
+            required = true
     end
 
-    pargs = ArgParse.parse_args(args, s) # the result is a Dict{String,Any}
-
-    if pargs["file2"] == nothing
-        dirpath = pargs["dirOrFile1"]
-        if !isdir(dirpath)
-            error("Only one argument and it is not a directory! ($dirpath)")
-        end
-        pargs["type"] = "directory"
-        pargs["directory"] = dirpath
-    else
-        file1 = pargs["dirOrFile1"]
-        file2 = pargs["file2"]
-        if !isfile(file1)
-            exiterror("First argument ($file1) is not a file!")
-        elseif !isfile(file2)
-            exiterror("First argument ($file2) is not a file!")
-        end
-        pargs["type"] = "files"
-        pargs["file1"] = file1
-        pargs["file2"] = file2
-    end
-
-    if pargs["verbose"]
-        println("Parsed args:")
-        for (key,val) in pargs
-            println("  $key  =>  $(repr(val))")
-        end
-    end
-
-    pargs
+    ArgParse.parse_args(args, s) # the result is a Dict{String,Any}
 end
 
 pargs = parse_args(ARGS)
@@ -84,18 +90,19 @@ DistancesFn = Dict(
     "jaccard" => (q) -> Jaccard(q),
     "overlap" => (q) -> Overlap(q),
     "sorensendice" => (q) -> SorensenDice(q),
-    "sorensen-dice" => (q) -> SorensenDice(q),
 
     "ratcliffobershelp" => (q) -> RatcliffObershelp(),
     "ratcliff-obershelp" => (q) -> RatcliffObershelp(),
 
-    # Note that NCD compressors cannot be modified!
+    # Note that NCD compressors cannot be modified with Winkler, Partial et al.
     "ncd-zlib" => (q) -> NCD(ZlibCompressor),
     "ncd-xz" => (q) -> NCD(XzCompressor),
     "ncd-zstd" => (q) -> NCD(ZstdCompressor),
     "ncd-bzip2" => (q) -> NCD(Bzip2Compressor),
     "ncd" => (q) -> NCD(Bzip2Compressor), # We use bzip2 as the default since it handles shorter strings better
 )
+
+QgramDistances = String["qgram", "cosine", "jaccard", "overlap", "sorensendice"]
 
 function can_be_modified(d)
     typeof(d) != NCD
@@ -108,6 +115,28 @@ DistanceModifierFn = Dict(
     "tokenset" => (d) -> TokenSet(d),
     "tokenmax" => (d) -> TokenMax(d),
 )
+
+function print_distance_functions()
+    names = sort(collect(keys(DistancesFn)))
+
+    print("Available distance functions (CANNOT be modified):\n  ")
+    print(join(filter(n -> !can_be_modified(DistancesFn[n](2)), names), "\n  "))
+
+    print("\n\nAvailable distance functions (can be modified):\n  ")
+    print(join(filter(n -> can_be_modified(DistancesFn[n](2)), names), "\n  "))
+
+    println("\n\nOf these the following accept different q values for the length of q-grams:")
+    println("  " * join(sort(QgramDistances), ", "))
+
+    print("\nAvailable distance modifiers:\n  ")
+    print(join(collect(keys(DistanceModifierFn)), "\n  "))
+    println("")
+end
+
+if pargs["%COMMAND%"] == "distfuncs"
+    print_distance_functions()
+    exit(0)
+end
 
 function get_distance(distdescription, q = 2, verbose = false, 
     modifierdescription = nothing)
@@ -150,13 +179,21 @@ function write_float_matrix_to_csv(csvfile::String, m::Matrix{Float64}, names::V
     end
 end
 
+function distmatrix_filename(distance, prefix = "distances_", postfix = ".csv")
+    dn = replace(string(distance), r"-_" => "")
+    dn = replace(dn, "(" => "")
+    dn = replace(dn, ")" => "")
+    timestamp = Libc.strftime("_%Y%m%d_%H%M%S", time())
+    prefix * dn * timestamp * postfix
+end
+
 function main(pargs)
     distance = get_distance(pargs["distance"], pargs["q"], 
         pargs["verbose"], pargs["modifier"])
-    if pargs["type"] == "files"
+    if pargs["%COMMAND%"] == "dist"
 
-        f1 = pargs["file1"]
-        f2 = pargs["file2"]
+        f1 = pargs["dist"]["file1"]
+        f2 = pargs["dist"]["file2"]
         distval = MultiDistances.file_distance(distance, f1, f2)
 
         if pargs["verbose"]
@@ -165,14 +202,58 @@ function main(pargs)
             println(distval)
         end
 
-    else pargs["type"] == "directory"
+    elseif pargs["%COMMAND%"] == "distances"
 
-        dir = pargs["directory"]
+        dir = pargs["distances"]["dir"]
+        filenames = sort(readdir(dir))
+
+        pargs["verbose"] && println("Reading contents of files")
+        filecontents = map(f -> read(joinpath(dir, f), String), filenames)
+
+        pargs["verbose"] && println("Calculating pairwise distances")
+        dm = MultiDistances.distance_matrix(distance, filecontents)
+
+        dmfilename = distmatrix_filename(distance)
+        write_float_matrix_to_csv(dmfilename, dm, filenames)
+        pargs["verbose"] && println("Wrote distance matrix to file: $dmfilename")
+
+    elseif pargs["%COMMAND%"] == "query"
+
+        pargs["verbose"] && println("Reading contents of files")
+
+        queryfile = pargs["query"]["file"]
+        querycontents = read(queryfile, String)
+
+        dir = pargs["query"]["dir"]
         filenames = sort(readdir(dir))
         filecontents = map(f -> read(joinpath(dir, f), String), filenames)
-        dm = MultiDistances.distance_matrix(distance, filecontents)
-        write_float_matrix_to_csv("distances.csv", dm, filenames)
 
+        similarities = map(fc -> compare(distance, querycontents, fc), filecontents)
+
+        ps = sortperm(similarities)
+
+        F = length(filenames)
+        N = min(pargs["query"]["n"], F)
+
+        println("Most similar files:")
+        for i in 1:N
+            idx = ps[F-i+1]
+            s = similarities[idx]
+            fn = filenames[idx]
+            println("  $i. $fn, $s")
+        end
+
+        println("\nMost distant files:")
+        for i in 1:N
+            idx = ps[i]
+            similarity = similarities[idx]
+            filename = filenames[idx]
+            println("  $(i). $(filename), $(similarity)")
+        end
+
+    else
+        error("Unknown command")
+        exit(-1)
     end
 
     exit(0)
