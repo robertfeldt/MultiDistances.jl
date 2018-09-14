@@ -21,9 +21,11 @@ COPY . /usr/src/MultiDistances
 
 # Install julia packages
 COPY docker/installpackages.jl /tmp/installpackages.jl
-#RUN  julia /tmp/installpackages.jl
+RUN  julia /tmp/installpackages.jl
+
 # By running instantiate it should download and install all packages we need.
-RUN  cd /usr/src/MultiDistances; julia -e 'using Pkg; Pkg.instantiate()'
+# Not sure it complies things etc though so skip for now...
+#RUN  cd /usr/src/MultiDistances; julia -e 'using Pkg; Pkg.instantiate()'
 
 ########################
 ## Java (for tika)
