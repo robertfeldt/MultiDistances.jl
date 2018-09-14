@@ -9,13 +9,21 @@ RUN apt-get update -qq \
 && apt-get upgrade
 
 ########################
+## Copy our files
+########################
+
+## Copy the files from this repo to the docker image
+COPY . /usr/src/MultiDistances
+
+########################
 ## Julia packages we need.
 ########################
 
 # Install julia packages
 COPY docker/installpackages.jl /tmp/installpackages.jl
-RUN  julia /tmp/installpackages.jl
-
+#RUN  julia /tmp/installpackages.jl
+# By running instantiate it should download and install all packages we need.
+RUN  cd /usr/src/MultiDistances; julia -e 'using Pkg; Pkg.instantiate()'
 
 ########################
 ## Java (for tika)
@@ -30,14 +38,6 @@ RUN  julia /tmp/installpackages.jl
 ########################
 
 #RUN apt-get install -y poppler-utils
-
-
-########################
-## Copy our files
-########################
-
-## Copy the files from this repo to the docker image
-COPY . /usr/src/MultiDistances
 
 
 ########################
