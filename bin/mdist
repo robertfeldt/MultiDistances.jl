@@ -264,12 +264,21 @@ function main(pargs)
 
     elseif pargs["%COMMAND%"] == "version"
 
-        version_path = joinpath(dirname(pathof(MultiDistances)), "..", "VERSION")
+        AbsPath = "/usr/src/MultiDistances" # a hack but these files are not in the git so not in the installed MultiDistances...
+
         println("mdist command for calculating file distances")
+
+        version_path = joinpath(AbsPath, "VERSION")
         if isfile(version_path)
-            println("version " * read(version_path, String))
+            print("version " * read(version_path, String))
         end
-        println("by Robert Feldt, robert.feldt@gmail.com")
+
+        timestamp_path = joinpath(AbsPath, "TIMESTAMP")
+        if isfile(timestamp_path)
+            print(", " * read(timestamp_path, String))
+        end
+
+        println("\nby Robert Feldt, robert.feldt@gmail.com")
         
     else
         error("Unknown command")
