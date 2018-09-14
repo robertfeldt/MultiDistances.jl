@@ -1,4 +1,4 @@
-# mdist Dockerfile
+# mdist
 
 Simple command line interface to calculate distances between files. Include a large number of distance functions, both classical ones (Levenshtein, Q-Grams etc) and compression based ones (NCD based on different compressors).
 
@@ -45,5 +45,25 @@ Note that some/dir must be mapped into the docker container so since we map "$PW
 Find the ten most similar and distant files to a file qfile when comparing it to the files in some/dir:
 
     docker run -it -v "$PWD":/data robertfeldt/mdist mdist --distance ncd-xz query qfile some/dir -n 10
+
+### View license
+
+View license information:
+
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist license
+
+Please cite our papers if you use mdist in your research. Or mail us to tell us you found it useful. This way we are more likely to update and evolve this tool. All feedback appreciated!
+
+### View version
+
+If you find problems please include the version information when mailing us. You can find it by:
+
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist version
+
+Of course, it would be best if you use the latest version of mdist before reporting a bug. Just do a:
+
+    docker pull robertfeldt/mdist:latest
+
+to ensure you are up-to-date. Thanks!
 
   [1]: https://www.docker.com/
