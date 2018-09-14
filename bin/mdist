@@ -90,7 +90,14 @@ using StringDistances
 q(args) = get(args, "q", 2)
 intval(v::AbstractString) = parse(Int, v)
 intval(v::Integer) = v
-lvl(args, lo, default, hi) = clamp(intval(get(args, "compression-level", default)), lo, hi)
+function safeget(dict, k, default)
+    if !haskey(dict, k) || dict[k] == nothing
+        return default
+    else
+        return intval(dict[k])
+    end
+end
+lvl(args, lo, default, hi) = clamp(safeget(args, "compression-level", default), lo, hi)
 
 # Given a q-gram length q return the string distance to use. Note that
 # many of them don't care about q.
