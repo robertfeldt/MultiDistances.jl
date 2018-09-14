@@ -1,43 +1,49 @@
-**FORTE Dockerfile**
+# mdist Dockerfile
 
-This repository contains docker images for the FORTE framework.
+Simple command line interface to calculate distances between files. Include a large number of distance functions, both classical ones (Levenshtein, Q-Grams etc) and compression based ones (NCD based on different compressors).
 
-**Installation**
+## Installation
 
 1. Install [Docker][1].
 
-2. Download docker image: `docker pull robertfeldt/forte`
+2. Download docker image: `docker pull robertfeldt/mdist`
 
-**Usage**
+## Usage
 
-    docker run -it robertfeldt/forte forte
+    docker run -it robertfeldt/mdist mdist
 
 to see the commands available. More information and help by running either of the commands below.
 
-To print the README:
+### To print help about available commands
 
-    docker run -it robertfeldt/forte forte readme
+    docker run -it robertfeldt/mdist mdist -h
 
-To print help about available commands:
+### To list all available distance functions
 
-    docker run -it robertfeldt/forte forte -h
+    docker run -it robertfeldt/mdist mdist distfuncs
 
-More detailed help about a forte command (here for the "analyse" command):
+### Calculate distance between two files
 
-    docker run -it robertfeldt/forte forte analyse -h
+Here we use the ncd-bzip2 distance function:
 
-To find information about how to map input files into the docker file:
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist --distance ncd-bzip2 dist file1 file2
 
-    docker run -it robertfeldt/forte forte helpdocker
+### Calculate distance matrix for a set of files
 
-Example of how to run FORTE for common use cases:
+Here between all files in the directory some/dir using the Levenshtein distance:
 
-    docker run -it robertfeldt/forte forte examples
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist -d levenshtein distances some/dir
 
-Complex but realistic actual use example which performs analysis and then starts web server:
-    docker run -it -p 42426:42426 -v /Users/feldt/dev/forte/test/data:/data robertfeldt/forte:latest forte analyse myinputfile.csv --featuremap myfeaturemap.csv -n -r --web
+This will output a file distances.csv which contains the full distance matrix.
 
-Same but serving the web pages on a different port:
-    docker run -it -p 42426:42426 -v /Users/feldt/dev/forte/test/data:/data robertfeldt/forte:latest forte analyse myinputfile.csv --featuremap myfeaturemap.csv -n -r --web --port=42567
+Note that some/dir must be mapped into the docker container so since we map "$PWD" into /data (in the docker container) some/dir must be available below "$PWD". If you want to calc distances of files in an absolute path /my/abs/path/dir-with-my-files do:
+
+    docker run -it -v "/my/abs/path":/data robertfeldt/mdist mdist distances dir-with-my-files
+
+### Find most similar and distant files to a file
+
+Find the ten most similar and distant files to a file qfile when comparing it to the files in some/dir:
+
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist --distance ncd-xz query qfile some/dir -n 10
 
   [1]: https://www.docker.com/
