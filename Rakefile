@@ -1,6 +1,6 @@
 desc "Run test suite"
 task :test do
-    sh "julia --color=yes -L src/SEPaperChecker.jl test/runtests.jl"
+    sh "julia --color=yes -L src/MultiDistances.jl test/runtests.jl"
 end
 
 task :default => :test
@@ -30,7 +30,7 @@ end
 
 DockerUser = "robertfeldt"
 DockerImageName = "mdist"
-Tag = "0.1.1"
+Tag = "0.1.2"
 
 StartTime = Time.now
 Timestamp = StartTime.strftime("%Y%m%d_%H%M%S")

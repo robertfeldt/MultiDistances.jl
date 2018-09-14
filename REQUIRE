@@ -5,3 +5,4 @@ CodecZlib
 CodecXz
 CodecZstd
 CodecBzip2
+https://github.com/robertfeldt/CodecLz4.jl

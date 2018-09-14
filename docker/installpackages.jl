@@ -28,3 +28,7 @@ using CodecBzip2
 
 Pkg.add("JSON")
 using JSON
+
+# For now we use the rf fork of CodecLz4 since the main one doesn't build on julia 1.0
+Pkg.add(PackageSpec(url="https://github.com/robertfeldt/CodecLz4.jl", rev="master"))
+using CodecLz4

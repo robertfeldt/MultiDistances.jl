@@ -104,6 +104,8 @@ DistancesFn = Dict(
     "ncd-zlib" => (q) -> NCD(ZlibCompressor),
     "ncd-xz" => (q) -> NCD(XzCompressor),
     "ncd-zstd" => (q) -> NCD(ZstdCompressor),
+    # CodecLz4 seems buggy so exclude for now
+    #"ncd-lz4"  => (q) -> NCD(LZ4Compressor),
     "ncd-bzip2" => (q) -> NCD(Bzip2Compressor),
     "ncd" => (q) -> NCD(Bzip2Compressor), # We use bzip2 as the default since it handles shorter strings better
 )
