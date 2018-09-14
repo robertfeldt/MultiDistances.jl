@@ -13,13 +13,8 @@ RUN apt-get update -qq \
 ########################
 
 # Install julia packages
-COPY docker/install/REQUIRE /tmp/REQUIRE
-COPY docker/install/installpackages.jl /tmp/installpackages.jl
-RUN  julia /tmp/installpackages.jl /tmp/REQUIRE
-
-# Precompile julia packages
-#COPY docker/install/precompile_packages.jl /tmp/precompile_packages.jl
-#RUN julia /tmp/precompile_packages.jl
+COPY docker/installpackages.jl /tmp/installpackages.jl
+RUN  julia /tmp/installpackages.jl
 
 
 ########################
