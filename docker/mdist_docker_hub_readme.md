@@ -1,5 +1,7 @@
 Simple command line interface to calculate distances between files. Include a large number of distance functions, both classical ones (Levenshtein, Q-Grams etc) and compression based ones (NCD based on different compressors).
 
+This is a command line interface to the [MultiDistances.jl][2] julia library.
+
 ## Installation
 
 1. Install [Docker][1].
@@ -65,3 +67,4 @@ Of course, it would be best if you use the latest version of mdist before report
 to ensure you are up-to-date. Thanks!
 
   [1]: https://www.docker.com/
+  [2]: https://github.com/robertfeldt/MultiDistances.jl
