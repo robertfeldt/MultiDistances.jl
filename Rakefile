@@ -85,6 +85,7 @@ end
 
 desc "Push latest docker image to Docker hub"
 task :upload do
+  sh "docker push robertfeldt/#{DockerImageName}:#{Tag}"
   sh "docker push robertfeldt/#{DockerImageName}:latest"
 end
 
