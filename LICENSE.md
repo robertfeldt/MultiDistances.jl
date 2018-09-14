@@ -1,6 +1,6 @@
-MultiDistances.jl is licensed under the MIT License:
+MultiDistances.jl and the mdist command are both licensed under the MIT License:
 
-> Copyright (c) 2016-2018: Robert Feldt (robert.feldt@gmail.com)
+> Copyright (c) 2013-2018: Robert Feldt (robert.feldt@gmail.com)
 >
 > Permission is hereby granted, free of charge, to any person obtaining
 > a copy of this software and associated documentation files (the
