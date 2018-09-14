@@ -187,8 +187,10 @@ end
 
 function distmatrix_filename(distance, prefix = "distances_", postfix = ".csv")
     dn = replace(string(distance), r"-_" => "")
-    dn = replace(dn, "(" => "")
-    dn = replace(dn, ")" => "")
+    dn = replace(dn, "(" => "_")
+    dn = replace(dn, ")" => "_")
+    dn = replace(dn, "{" => "_")
+    dn = replace(dn, "}" => "_")
     timestamp = Libc.strftime("_%Y%m%d_%H%M%S", time())
     prefix * dn * timestamp * postfix
 end
