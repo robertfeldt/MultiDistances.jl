@@ -172,7 +172,7 @@ end
 
 function write_float_matrix_to_csv(csvfile::String, m::Matrix{Float64}, names::Vector{String})
     open(csvfile, "w") do fh
-        println(fh, "," * join(names, ","))
+        println(fh, "File," * join(names, ","))
         for i in 1:size(m, 1)
             print(fh, names[i])
             for j in 1:size(m, 2)
