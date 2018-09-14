@@ -39,6 +39,12 @@ function parse_args(args)
         "query"
             help = "find the most similar and distant files given a query file"
             action = :command
+        "license"
+            help = "print the license"
+            action = :command
+        "version"
+            help = "print the version info"
+            action = :command
     end
 
     @add_arg_table s["distances"] begin
@@ -251,6 +257,20 @@ function main(pargs)
             println("  $(i). $(filename), $(similarity)")
         end
 
+    elseif pargs["%COMMAND%"] == "license"
+
+        lic_path = joinpath(dirname(@__FILE__()), "..", "LICENSE.md")
+        println(read(lic_path, String))
+
+    elseif pargs["%COMMAND%"] == "version"
+
+        version_path = joinpath(dirname(@__FILE__()), "..", "VERSION")
+        println("mdist command for calculating file distances")
+        if isfile(version_path)
+            println("version " * read(version_path, String))
+        end
+        println("by Robert Feldt, robert.feldt@gmail.com")
+        
     else
         error("Unknown command")
         exit(-1)

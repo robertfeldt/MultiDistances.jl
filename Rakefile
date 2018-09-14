@@ -30,7 +30,7 @@ end
 
 DockerUser = "robertfeldt"
 DockerImageName = "mdist"
-Tag = "0.1.0"
+Tag = "0.1.1"
 
 StartTime = Time.now
 Timestamp = StartTime.strftime("%Y%m%d_%H%M%S")
