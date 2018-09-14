@@ -259,12 +259,12 @@ function main(pargs)
 
     elseif pargs["%COMMAND%"] == "license"
 
-        lic_path = joinpath(dirname(@__FILE__()), "..", "LICENSE.md")
+        lic_path = joinpath(dirname(pathof(MultiDistances)), "..", "LICENSE.md")
         println(read(lic_path, String))
 
     elseif pargs["%COMMAND%"] == "version"
 
-        version_path = joinpath(dirname(@__FILE__()), "..", "VERSION")
+        version_path = joinpath(dirname(pathof(MultiDistances)), "..", "VERSION")
         println("mdist command for calculating file distances")
         if isfile(version_path)
             println("version " * read(version_path, String))
