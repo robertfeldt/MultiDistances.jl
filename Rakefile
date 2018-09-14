@@ -52,7 +52,7 @@ def docker_build_image(dockerfile, dockeruser, imagename, tag)
   time = Time.now
 
   # Build the docker image and also tag as latest
-  sh "docker build -t=\"#{dockeruser}/#{imagename}:#{tag}\" . | tee .build.log || exit 1"
+  sh "docker build --rm=true -t=\"#{dockeruser}/#{imagename}:#{tag}\" . | tee .build.log || exit 1"
   id = `tail -1 .build.log | awk '{print $3;}'`
   id = id.strip
   sh "docker tag #{id} #{dockeruser}/#{imagename}:latest"
