@@ -106,6 +106,11 @@ task :rundbr do
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} julia /usr/src/MultiDistances/bin/mdist"
 end
 
+desc "Test docker image by calculating full distance matrix from the test data files"
+task :distmtest do
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} julia /usr/src/MultiDistances/bin/mdist --distance ncd-bzip2 --verbose test/data"
+end
+
 desc "Clean docker build"
 task :cleandocker do
   sh "rm -rf Dockerfile .build.log LATESTGITID TIMESTAMP VERSION"
