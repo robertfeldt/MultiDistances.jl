@@ -1,6 +1,6 @@
 desc "Run test suite"
 task :test do
-    sh "julia --color=yes -L src/SEPaperChecker.jl test/runtests.jl"
+    sh "julia --color=yes -e 'using Pkg; Pkg.test(\"MultiDistances\")'"
 end
 
 task :default => :test
