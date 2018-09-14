@@ -30,15 +30,14 @@ end
 
 DockerUser = "robertfeldt"
 DockerImageName = "mdist"
-Tag = "0.1.1"
+Tag = File.open("VERSION", "r") {|fh| fh.read().strip()}
 
 StartTime = Time.now
 Timestamp = StartTime.strftime("%Y%m%d_%H%M%S")
 TimestampDate = StartTime.strftime("%Y-%m-%d")
 TimestampTime = StartTime.strftime("%H:%M.%S")
 
-def save_version()
-  File.open("VERSION", "w") {|fh| fh.puts("#{Tag}")}
+def save_timestamp()
   File.open("TIMESTAMP", "w") {|fh| fh.puts("#{Timestamp}")}
   File.open("LATESTGITID", "w") {|fh| fh.puts(`git log --format="%H" -n 1`)}
 end
@@ -64,12 +63,12 @@ def docker_build_image(dockerfile, dockeruser, imagename, tag)
 
   # Now clean up the soft link we created as well as temp files
   sh "rm Dockerfile"
-  sh "rm -rf VERSION TIMESTAMP LATESTGITID"
+  sh "rm -rf TIMESTAMP LATESTGITID"
 end
 
 desc "Build docker image"
 task :build_docker_image do
-  save_version()
+  save_timestamp()
 
   docker_build_image("docker/mdist.Dockerfile",
     DockerUser, DockerImageName, Tag
@@ -114,5 +113,5 @@ end
 
 desc "Clean docker build"
 task :cleandocker do
-  sh "rm -rf Dockerfile .build.log LATESTGITID TIMESTAMP VERSION"
+  sh "rm -rf Dockerfile .build.log LATESTGITID TIMESTAMP"
 end

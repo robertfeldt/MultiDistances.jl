@@ -4,9 +4,10 @@ import StringDistances: PreMetric, compare, evaluate
 using CodecZlib, CodecXz, CodecZstd, CodecBzip2
 
 export file_distance, file_similarity,
-       NCD, ZlibCompressor, evaluate, compare
+       NCD, evaluate, compare
 
-export ZlibCompressor, XzCompressor, ZstdCompressor, Bzip2Compressor
+export ZlibCompressor, GzipCompressor, DeflateCompressor
+export XzCompressor, ZstdCompressor, Bzip2Compressor
 
 include("utilities.jl")
 include("ncd.jl")

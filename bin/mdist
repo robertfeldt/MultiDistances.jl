@@ -102,6 +102,8 @@ DistancesFn = Dict(
 
     # Note that NCD compressors cannot be modified with Winkler, Partial et al.
     "ncd-zlib" => (q) -> NCD(ZlibCompressor),
+    "ncd-gzip" => (q) -> NCD(GzipCompressor),
+    "ncd-deflate" => (q) -> NCD(DeflateCompressor),
     "ncd-xz" => (q) -> NCD(XzCompressor),
     "ncd-zstd" => (q) -> NCD(ZstdCompressor),
     "ncd-bzip2" => (q) -> NCD(Bzip2Compressor),
@@ -277,7 +279,12 @@ function main(pargs)
 
         timestamp_path = joinpath(AbsPath, "TIMESTAMP")
         if isfile(timestamp_path)
-            print(", " * read(timestamp_path, String))
+            print(", " * strip(read(timestamp_path, String)))
+        end
+
+        gitid_path = joinpath(AbsPath, "LATESTGITID")
+        if isfile(gitid_path)
+            print(", " * strip(read(gitid_path, String)))
         end
 
         println("\nby Robert Feldt, robert.feldt@gmail.com")
