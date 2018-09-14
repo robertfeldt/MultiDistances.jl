@@ -270,7 +270,7 @@ function main(pargs)
 
         version_path = joinpath(AbsPath, "VERSION")
         if isfile(version_path)
-            print("version " * read(version_path, String))
+            print("version " * strip(read(version_path, String)))
         end
 
         timestamp_path = joinpath(AbsPath, "TIMESTAMP")
