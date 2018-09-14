@@ -9,7 +9,7 @@ end
 function parse_args(args)
 
     # initialize the settings (the description is for the help screen)
-    s = ArgParseSettings(description = "sdist - string distance calculator")
+    s = ArgParseSettings(description = "mdist - multi (string) distance calculator")
 
     @add_arg_table s begin
         "--distance", "-d"
@@ -69,7 +69,6 @@ end
 
 pargs = parse_args(ARGS)
 
-#include("../src/MultiDistances.jl")
 using MultiDistances
 using StringDistances
 
