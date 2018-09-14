@@ -1,6 +1,6 @@
 module MultiDistances
 
-import StringDistances: PreMetric, compare, evaluate
+import StringDistances: PreMetric, compare, evaluate, Levenshtein
 using CodecZlib, CodecXz, CodecZstd, CodecBzip2
 
 export file_distance, file_similarity,
