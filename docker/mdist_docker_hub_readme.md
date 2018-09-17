@@ -46,6 +46,10 @@ Find the ten most similar and distant files to a file qfile when comparing it to
 
     docker run -it -v "$PWD":/data robertfeldt/mdist mdist --distance ncd-xz query qfile some/dir -n 10
 
+Find the four most similar and distant files to a file qfile when comparing it to all files that recursively can be found under dir and that has a file extension of txt or md:
+
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist --distance ncd-xz -r --file-extensions "txt,md" query qfile dir -n 4
+
 ### View license
 
 View license information:
