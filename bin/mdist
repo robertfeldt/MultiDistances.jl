@@ -30,6 +30,13 @@ function parse_args(args)
         "--verbose"
             help = "verbose during processing"
             action = :store_true
+        "--recurse", "-r"
+            help = "recurse into sub directories when selecting files"
+            action = :store_true
+        "--file-extensions"
+            help = "file extensions to include when selecting files"
+            default = ".txt"
+            required = false
         "distfuncs"
             help = "list all available distance functions"
             action = :command
@@ -224,6 +231,38 @@ function distmatrix_filename(distance, prefix = "distances_", postfix = ".csv")
     replace(name, r"_+" => "_")
 end
 
+fileextensionin(fn, extensions) = last(splitext(fn)) ∈ extensions
+
+# Expand a list of extensions provided as arg on command line to array
+# of them that we can match on.
+function extensions_from_extension_spec_arg(extspec)
+    exts = map(strip, split(extspec, ","))
+    for e in copy(exts)
+        if e[1:1] != "."
+            push!(exts, "." * e)
+        end
+    end
+    unique(exts)
+end
+
+function find_files(dir, args)
+    extensions = extensions_from_extension_spec_arg(args["file-extensions"]) 
+    if args["recurse"]
+        fs = String[]
+        for (root, dirs, files) in walkdir(dir)
+            for file in files
+                if fileextensionin(file, extensions)
+                    push!(fs, joinpath(root, file))
+                end
+            end
+        end
+    else
+        fs = filter(fn -> fileextensionin(fn, extensions), readdir(dir))
+        fs = map(fn -> joinpath(dir, fn), fs)
+    end
+    return fs
+end
+
 function main(pargs)
     distance = create_distance(pargs)
 
@@ -242,10 +281,10 @@ function main(pargs)
     elseif pargs["%COMMAND%"] == "distances"
 
         dir = pargs["distances"]["dir"]
-        filenames = sort(readdir(dir))
+        filenames = find_files(dir, pargs)
 
         pargs["verbose"] && println("Reading contents of files")
-        filecontents = map(f -> read(joinpath(dir, f), String), filenames)
+        filecontents = map(f -> read(f, String), filenames)
 
         pargs["verbose"] && println("Calculating pairwise distances")
         dm = MultiDistances.distance_matrix(distance, filecontents)
@@ -262,8 +301,8 @@ function main(pargs)
         querycontents = read(queryfile, String)
 
         dir = pargs["query"]["dir"]
-        filenames = sort(readdir(dir))
-        filecontents = map(f -> read(joinpath(dir, f), String), filenames)
+        filenames = find_files(dir, pargs)
+        filecontents = map(f -> read(f, String), filenames)
 
         similarities = map(fc -> compare(distance, querycontents, fc), filecontents)
 
