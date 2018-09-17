@@ -25,7 +25,7 @@ task :loc do
 end
 
 task :clobber do
-  sh "rm -rf *.csv *.json test/data/*.csv test/data/*.json"
+  sh "rm -rf *.csv *.json"
 end
 
 DockerUser = "robertfeldt"
@@ -109,8 +109,12 @@ end
 desc "Test docker image"
 task :dockertest do
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-bzip2 --verbose distances test/data"
+  print("\n")
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance jaccard --verbose dist test/data/martha.txt test/data/marhta.txt"
+  print("\n")
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance levenshtein --verbose query test/data/martha.txt test/data"
+  print("\n")
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-bzip2 --verbose -r --file-extensions \"txt,jl\" query test/runtests.jl test"
 end
 
 desc "Clean docker build"
