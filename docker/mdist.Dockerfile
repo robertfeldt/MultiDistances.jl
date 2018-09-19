@@ -8,6 +8,10 @@ RUN apt-get update -qq \
 && apt-get dist-upgrade -y \
 && apt-get upgrade
 
+## Add tar and bzip2 and xz just as a convenience if we need them
+## when working with large batches of files to be processed.
+RUN apt-get install -y tar bzip2
+
 ########################
 ## Copy our files
 ########################
