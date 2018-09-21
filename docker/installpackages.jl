@@ -2,9 +2,6 @@
 # so we should not need to do more. We might need to ensure precompilation though?
 using Pkg
 
-Pkg.add(PackageSpec(url="https://github.com/robertfeldt/MultiDistances.jl", rev="master"))
-using MultiDistances
-
 Pkg.add("Distances")
 using Distances
 
@@ -31,3 +28,6 @@ using JSON
 
 Pkg.add(PackageSpec(url="https://github.com/invenia/CodecLz4.jl.git", rev="master"))
 using CodecLz4
+
+Pkg.add(PackageSpec(url="https://github.com/robertfeldt/MultiDistances.jl", rev="master"))
+using MultiDistances
