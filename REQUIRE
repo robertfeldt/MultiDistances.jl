@@ -5,3 +5,4 @@ CodecZlib
 CodecXz
 CodecZstd
 CodecBzip2
+https://github.com/invenia/CodecLz4.jl.git

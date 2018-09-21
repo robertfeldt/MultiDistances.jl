@@ -1,11 +1,12 @@
 name = "MultiDistances"
 uuid = "39d1869a-b723-11e8-247f-a9d9d7937864"
 authors = ["Robert Feldt <robert.feldt@gmail.com>"]
-version = "0.1.0"
+version = "0.1.4"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 CodecBzip2 = "523fee87-0ab8-5b00-afb7-3ecf72e48cfd"
+CodecLz4 = "5ba52731-8f18-5e0d-9241-30f10d1ec561"
 CodecXz = "ba30903b-d9e8-5048-a5ec-d1f5b0d4b47b"
 CodecZlib = "944b1d66-785c-5afd-91f1-9de20f533193"
 CodecZstd = "6b39b394-51ab-5f42-8807-6242bab2b4c2"

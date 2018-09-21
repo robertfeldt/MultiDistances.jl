@@ -31,6 +31,14 @@ git-tree-sha1 = "6baeaa476f6495c282829abdef0ecdca18d33bbe"
 uuid = "523fee87-0ab8-5b00-afb7-3ecf72e48cfd"
 version = "0.5.0"
 
+[[CodecLz4]]
+deps = ["BinDeps", "Compat", "Libdl", "TranscodingStreams"]
+git-tree-sha1 = "4b50e0d28a531eb39b7bdfe936ab5685e0c468fd"
+repo-rev = "master"
+repo-url = "https://github.com/invenia/CodecLz4.jl.git"
+uuid = "5ba52731-8f18-5e0d-9241-30f10d1ec561"
+version = "0.0.2+"
+
 [[CodecXz]]
 deps = ["BinaryProvider", "Libdl", "Pkg", "Test", "TranscodingStreams"]
 git-tree-sha1 = "52be3610294fc7660330d1b0dadb9ce675827ce1"
@@ -91,9 +99,9 @@ version = "1.0.0"
 
 [[LibCURL]]
 deps = ["BinaryProvider", "Compat", "Libdl", "Pkg", "Printf"]
-git-tree-sha1 = "ffb95ae47142be781d9f59af86b724d921acb6c1"
+git-tree-sha1 = "6339c87cb76923a3cf947fcd213cbc364355c9c9"
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.4.0"
+version = "0.4.1"
 
 [[LibExpat]]
 deps = ["Compat", "Pkg"]

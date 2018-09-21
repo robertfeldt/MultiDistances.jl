@@ -1,13 +1,13 @@
 module MultiDistances
 
 import StringDistances: PreMetric, compare, evaluate, Levenshtein
-using CodecZlib, CodecXz, CodecZstd, CodecBzip2
+using CodecZlib, CodecXz, CodecZstd, CodecBzip2, CodecLz4
 
 export file_distance, file_similarity,
        NCD, evaluate, compare
 
 export ZlibCompressor, GzipCompressor, DeflateCompressor
-export XzCompressor, ZstdCompressor, Bzip2Compressor
+export XzCompressor, ZstdCompressor, Bzip2Compressor, LZ4Compressor
 
 include("utilities.jl")
 include("ncd.jl")

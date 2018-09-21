@@ -108,6 +108,8 @@ end
 
 desc "Test docker image"
 task :dockertest do
+  sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist distfuncs"
+  print("\n")
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-bzip2 --verbose distances test/data"
   print("\n")
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance jaccard --verbose dist test/data/martha.txt test/data/marhta.txt"
