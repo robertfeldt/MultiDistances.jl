@@ -29,5 +29,5 @@ using CodecBzip2
 Pkg.add("JSON")
 using JSON
 
-Pkg.add("https://github.com/invenia/CodecLz4.jl.git")
+Pkg.add(PackageSpec(url="https://github.com/invenia/CodecLz4.jl.git", rev="master"))
 using CodecLz4
