@@ -1,5 +1,5 @@
 # Pull base image.
-FROM julia:1.0.0
+FROM julia:1.1.0
 
 MAINTAINER "Robert Feldt" robert.feldt@gmail.com
 
@@ -13,6 +13,21 @@ RUN apt-get install -y build-essential
 ## Add tar and bzip2 and xz just as a convenience if we need them
 ## when working with large batches of files to be processed.
 RUN apt-get install -y tar bzip2
+
+########################
+## Java (for tika)
+########################
+
+# Install Java. We only install JRE here, add default-jdk if you need the JDK.
+#RUN apt-get update && apt-get install -y default-jre
+
+
+########################
+## poppler-utils for pdftotext
+########################
+
+#RUN apt-get install -y poppler-utils
+
 
 ########################
 ## Copy our files
@@ -30,22 +45,8 @@ COPY docker/installpackages.jl /tmp/installpackages.jl
 RUN  julia /tmp/installpackages.jl
 
 # By running instantiate it should download and install all packages we need.
-# Not sure it complies things etc though so skip for now...
+# Not sure it compiles things etc though so skip for now...
 #RUN  cd /usr/src/MultiDistances; julia -e 'using Pkg; Pkg.instantiate()'
-
-########################
-## Java (for tika)
-########################
-
-# Install Java. We only install JRE here, add default-jdk if you need the JDK.
-#RUN apt-get update && apt-get install -y default-jre
-
-
-########################
-## poppler-utils for pdftotext
-########################
-
-#RUN apt-get install -y poppler-utils
 
 
 ########################
