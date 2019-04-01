@@ -15,7 +15,7 @@ function distance_matrix(distance, strings::Vector{String};
 
     p = if showprogress
         numtotaldistances = n + div(n * (n - 1),  2)
-        Progress(numtotaldistances, 1.0, "Calculating distances...", 40)
+        Progress(numtotaldistances, 0.2, "Calculating distances...", 40)
     end
 
     for i in 1:n
