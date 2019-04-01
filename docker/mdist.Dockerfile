@@ -47,7 +47,7 @@ COPY . /usr/src/MultiDistances
 RUN julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/robertfeldt/MultiDistances.jl", rev="master")); Pkg.add(PackageSpec(url="https://github.com/matthieugomez/StringDistances.jl", rev="master")); Pkg.update(); Pkg.API.precompile();'
 
 # Can't precompile MultiDistances itself, for some reason
-#RUN cd /usr/src/MultiDistances && julia -e 'using Pkg; Pkg.activate("."); Pkg.API.precompile();'
+RUN cd /usr/src/MultiDistances && julia -e 'using Pkg; Pkg.activate("."); Pkg.API.precompile();'
 
 ########################
 ## Set up our commands
