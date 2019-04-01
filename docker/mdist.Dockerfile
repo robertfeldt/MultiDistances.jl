@@ -12,7 +12,7 @@ RUN apt-get install -y build-essential
 
 ## Add tar and bzip2 and xz just as a convenience if we need them
 ## when working with large batches of files to be processed.
-RUN apt-get install -y tar bzip2 less
+RUN apt-get install -y tar bzip2 less nano
 
 ########################
 ## Java (for tika)
@@ -44,8 +44,10 @@ COPY . /usr/src/MultiDistances
 #COPY docker/installpackages.jl /tmp/installpackages.jl
 #RUN  julia /tmp/installpackages.jl
 
-RUN julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/robertfeldt/MultiDistances.jl", rev="master"));'
-RUN cd /usr/src/MultiDistances && julia -e 'using Pkg; Pkg.activate("."); Pkg.API.precompile();'
+RUN julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/robertfeldt/MultiDistances.jl", rev="master")); Pkg.add(PackageSpec(url="https://github.com/matthieugomez/StringDistances.jl", rev="master")); Pkg.update(); Pkg.API.precompile();'
+
+# Can't precompile MultiDistances itself, for some reason
+#RUN cd /usr/src/MultiDistances && julia -e 'using Pkg; Pkg.activate("."); Pkg.API.precompile();'
 
 ########################
 ## Set up our commands
