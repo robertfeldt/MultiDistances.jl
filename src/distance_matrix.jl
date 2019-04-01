@@ -23,8 +23,7 @@ function distance_matrix(distance, strings::Vector{String};
 
     for i in 1:n
         for j in i:n
-            dm[i, j] = dm[i, j] = evaluate(distance, precalced[i], precalced[j])
-            sleep(0.3)
+            dm[j, i] = dm[i, j] = evaluate(distance, precalced[i], precalced[j])
             if showprogress
                 next!(p)
             end
