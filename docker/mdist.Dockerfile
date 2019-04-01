@@ -41,13 +41,11 @@ COPY . /usr/src/MultiDistances
 ########################
 
 # Install julia packages
-COPY docker/installpackages.jl /tmp/installpackages.jl
-RUN  julia /tmp/installpackages.jl
+#COPY docker/installpackages.jl /tmp/installpackages.jl
+#RUN  julia /tmp/installpackages.jl
 
-# By running instantiate it should download and install all packages we need.
-# Not sure it compiles things etc though so skip for now...
-#RUN  cd /usr/src/MultiDistances; julia -e 'using Pkg; Pkg.instantiate()'
-
+RUN julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/robertfeldt/MultiDistances.jl", rev="master"));'
+RUN cd /usr/src/MultiDistances && julia -e 'using Pkg; Pkg.activate("."); Pkg.API.precompile();'
 
 ########################
 ## Set up our commands

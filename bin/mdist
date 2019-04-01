@@ -1,4 +1,7 @@
 #!/usr/bin/env julia --color=yes
+using Pkg
+Pkg.activate(joinpath(@__FILE__, "..")); # So that we use right versions of packages below...
+
 using ArgParse
 
 function exiterror(str)
@@ -58,7 +61,10 @@ function parse_args(args)
     end
 
     @add_arg_table s["distances"] begin
-        "dir"
+       "--precalc"
+            help = "precalculate to speed up distance calculations (default: false)"
+            action = :store_true
+       "dir"
             help = "directory with files to calculate distances of"
             required = true
     end
@@ -289,7 +295,8 @@ function main(pargs)
         filecontents = map(f -> read(f, String), filenames)
 
         pargs["verbose"] && println("Calculating pairwise distances")
-        dm = MultiDistances.distance_matrix(distance, filecontents)
+        dm = MultiDistances.distance_matrix(distance, filecontents; 
+                precalc = pargs["distances"]["precalc"])
 
         dmfilename = distmatrix_filename(distance)
         write_float_matrix_to_csv(dmfilename, dm, filenames)
