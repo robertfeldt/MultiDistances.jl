@@ -32,7 +32,8 @@ precalculate(dist, s) = s
 
 # But we introduce precalculation by the qgram count pairs sorted by qgram.
 # This way we can just iterate through them later to compare their counts.
-function precalculate(dist::Q, s::AbstractString) where {Q<:StringDistances.AbstractQGram{N}, N}
+function precalculate(dist::AbstractQGram{N}, s::AbstractString) where N
+    N = qsize(dist)
     iter = QGramIterator{typeof(s), N}(s, length(s))
     SortedQGramCounts(iter)
 end
