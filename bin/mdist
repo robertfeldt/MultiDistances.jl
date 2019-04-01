@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia --color=yes
 using ArgParse
 
 function exiterror(str)
