@@ -1,5 +1,8 @@
 using StringDistances
-using StringDistances: param, QGramIterator, AbstractQGram
+using StringDistances: QGramIterator, AbstractQGram
+
+# This is only on StringDistances#master yet to add here so we are not dependent on master
+param(x::AbstractQGram{N}) where N = N
 
 function qgram_count_dict(iter::QGramIterator{T, N}) where {T, N}
 	d = Dict{T, UInt}()
