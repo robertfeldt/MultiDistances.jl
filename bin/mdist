@@ -1,8 +1,11 @@
-#!/usr/bin/env julia --color=yes
+#!/usr/bin/env julia
+println("1")
 using Pkg
+println("2")
 Pkg.activate("/usr/src/MultiDistances"); # So that we use right versions of packages below...
-
+println("3")
 using ArgParse
+println("4")
 
 function exiterror(str)
     println(str)
