@@ -1,8 +1,5 @@
 using ProgressMeter
 
-# Default is to not precalc. Override for Distances later.
-precalculate(dist, s) = s
-
 function distance_matrix(distance, strings::Vector{String}; 
             showprogress = true,
             precalc = true)

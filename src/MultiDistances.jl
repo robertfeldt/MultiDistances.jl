@@ -10,6 +10,9 @@ export ZlibCompressor, GzipCompressor, DeflateCompressor
 export XzCompressor, ZstdCompressor, Bzip2Compressor, LZ4Compressor
 
 include("utilities.jl")
+include("precalc_string_distances.jl")
+#include("common_prefix.jl")
+
 include("ncd.jl")
 include("distance_matrix.jl")
 
