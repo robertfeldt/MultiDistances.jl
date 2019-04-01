@@ -183,8 +183,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [[StringDistances]]
 deps = ["Distances", "IterTools", "Random", "Test"]
 git-tree-sha1 = "157303ac6eaed48f515bd6ebdcd749276e287ada"
+pinned = true
 repo-rev = "master"
-repo-url = "https://github.com/matthieugomez/StringDistances.jl.git"
+repo-url = "https://github.com/matthieugomez/StringDistances.jl"
 uuid = "88034a9c-02f8-509d-84a9-84ec65e18404"
 version = "0.3.1+"
 

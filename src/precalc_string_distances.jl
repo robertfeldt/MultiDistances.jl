@@ -1,5 +1,5 @@
 using StringDistances
-using StringDistances: QGramIterator, AbstractQGram
+using StringDistances: param, QGramIterator, AbstractQGram
 
 function qgram_count_dict(iter::QGramIterator{T, N}) where {T, N}
 	d = Dict{T, UInt}()
@@ -32,8 +32,8 @@ precalculate(dist, s) = s
 
 # But we introduce precalculation by the qgram count pairs sorted by qgram.
 # This way we can just iterate through them later to compare their counts.
-function precalculate(dist::D, s::AbstractString) where {D<:AbstractQGram{N}} where N
-    iter = QGramIterator{typeof(s), N}(s, length(s))
+function precalculate(dist::AbstractQGram, s::AbstractString)
+    iter = QGramIterator{typeof(s), param(dist)}(s, length(s))
     SortedQGramCounts(iter)
 end
 
