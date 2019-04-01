@@ -1,6 +1,6 @@
 #!/usr/bin/env julia --color=yes
 using Pkg
-Pkg.activate(joinpath(@__FILE__, "..")); # So that we use right versions of packages below...
+Pkg.activate("/usr/src/MultiDistances"); # So that we use right versions of packages below...
 
 using ArgParse
 
