@@ -12,7 +12,7 @@ RUN apt-get install -y build-essential
 
 ## Add tar and bzip2 and xz just as a convenience if we need them
 ## when working with large batches of files to be processed.
-RUN apt-get install -y tar bzip2
+RUN apt-get install -y tar bzip2 less
 
 ########################
 ## Java (for tika)
