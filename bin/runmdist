@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
-/usr/bin/env julia --color=yes $(pwd)/mdistmain "$@"
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+echo "$SCRIPTPATH"
+/usr/bin/env julia --color=yes "$SCRIPTPATH"/mdistmain "$@"
