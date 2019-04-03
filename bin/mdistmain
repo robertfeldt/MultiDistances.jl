@@ -1,0 +1,374 @@
+#!/usr/bin/env julia
+using Pkg
+Pkg.activate("/usr/src/MultiDistances"); # So that we use right versions of packages below...
+using ArgParse
+
+function exiterror(str)
+    println(str)
+    exit(-1)
+end
+
+function parse_args(args)
+
+    # initialize the settings (the description is for the help screen)
+    s = ArgParseSettings(description = "mdist - multi (string) distance calculator")
+
+    @add_arg_table s begin
+        "--distance", "-d"
+            help = "distance function(s) to use"
+            default = "levenshtein"
+        "-q"
+            help = "q-gram length"
+            arg_type = Int
+            required = false
+            default = 2
+        "--compression-level", "-l"
+            help = "compression level"
+            required = false
+        "--modifier"
+            help = "Distance modifier"
+            arg_type = String
+            required = false
+        "--verbose"
+            help = "verbose during processing"
+            action = :store_true
+        "--recurse", "-r"
+            help = "recurse into sub directories when selecting files"
+            action = :store_true
+        "--file-extensions"
+            help = "file extensions to include when selecting files"
+            default = ".txt"
+            required = false
+        "distfuncs"
+            help = "list all available distance functions"
+            action = :command
+        "distances"
+            help = "calculate distances of a set of files in a dir"
+            action = :command
+        "dist"
+            help = "calculate distance between two files"
+            action = :command
+        "query"
+            help = "find the most similar and distant files given a query file"
+            action = :command
+        "license"
+            help = "print the license"
+            action = :command
+        "version"
+            help = "print the version info"
+            action = :command
+    end
+
+    @add_arg_table s["distances"] begin
+       "--precalc"
+            help = "precalculate to speed up distance calculations (default: false)"
+            action = :store_true
+       "dir"
+            help = "directory with files to calculate distances of"
+            required = true
+    end
+
+    @add_arg_table s["dist"] begin
+        "file1"
+            help = "first file"
+            required = true
+        "file2"
+            help = "second file"
+            required = true
+    end
+
+    @add_arg_table s["query"] begin
+        "-n"
+            help = "How many most similar/distant files to list"
+            arg_type = Int
+            required = false
+            default = 7
+        "file"
+            help = "file to compare"
+            required = true
+        "dir"
+            help = "set of files to compare to"
+            required = true
+    end
+
+    ArgParse.parse_args(args, s) # the result is a Dict{String,Any}
+end
+
+pargs = parse_args(ARGS)
+
+using MultiDistances
+using StringDistances
+
+q(args) = get(args, "q", 2)
+intval(v::AbstractString) = parse(Int, v)
+intval(v::Integer) = v
+function safeget(dict, k, default)
+    if !haskey(dict, k) || dict[k] == nothing
+        return default
+    else
+        return intval(dict[k])
+    end
+end
+lvl(args, lo, default, hi) = clamp(safeget(args, "compression-level", default), lo, hi)
+
+# Given a q-gram length q return the string distance to use. Note that
+# many of them don't care about q.
+DistancesFn = Dict(
+    # Edit dist funcs don't care about q or level (l)
+    "levenshtein" => (a) -> Levenshtein(),
+    "jaro" => (a) -> Jaro(),
+    "hamming" => (a) -> Hamming(),
+
+    "ratcliffobershelp" => (a) -> RatcliffObershelp(),
+    "ratcliff-obershelp" => (a) -> RatcliffObershelp(),
+
+    # Qgram dist funcs only care about q but not level (l)
+    "qgram" => (a) -> QGram(q(a)),
+    "cosine" => (a) -> Cosine(q(a)),
+    "jaccard" => (a) -> Jaccard(q(a)),
+    "overlap" => (a) -> Overlap(q(a)),
+    "sorensendice" => (a) -> SorensenDice(q(a)),
+
+    # NCD dist funcs. Some care about level (l) but none about q.
+    # Note that NCD compressors cannot be modified with Winkler, Partial et al.
+    "ncd-zlib" => (a) -> NCD(ZlibCompressor),
+    "ncd-gzip" => (a) -> NCD(GzipCompressor),
+    "ncd-deflate" => (a) -> NCD(DeflateCompressor),
+    "ncd-xz" => (a) -> NCD(XzCompressor(; level = lvl(a, 1, 6, 9))),
+    "ncd-lz4" => (a) -> NCD(LZ4Compressor(; compressionlevel = lvl(a, -1, 2, 12))),
+    "ncd-zstd" => (a) -> NCD(ZstdCompressor(; level = lvl(a, 1, 3, 19))),
+    "ncd-bzip2" => (a) -> NCD(Bzip2Compressor(; workfactor = lvl(a, 0, 30, 250))),
+    "ncd" => (a) -> NCD(Bzip2Compressor), # We use bzip2 as the default since it seems to handle shorter strings better
+)
+
+QgramDistances = String["qgram", "cosine", "jaccard", "overlap", "sorensendice"]
+
+function can_be_modified(d)
+    typeof(d) != NCD
+end
+
+DistanceModifierFn = Dict(
+    "winkler" => (d) -> Winkler(d),
+    "partial" => (d) -> Partial(d),
+    "tokensort" => (d) -> TokenSort(d),
+    "tokenset" => (d) -> TokenSet(d),
+    "tokenmax" => (d) -> TokenMax(d),
+)
+
+function print_distance_functions()
+    names = sort(collect(keys(DistancesFn)))
+
+    print("Available distance functions (CANNOT be modified):\n  ")
+    args = Dict("q" => 2)
+    print(join(filter(n -> !can_be_modified(DistancesFn[n](args)), names), "\n  "))
+
+    print("\n\nAvailable distance functions (can be modified):\n  ")
+    print(join(filter(n -> can_be_modified(DistancesFn[n](args)), names), "\n  "))
+
+    println("\n\nOf these the following accept different q values for the length of q-grams:")
+    println("  " * join(sort(QgramDistances), ", "))
+
+    print("\nAvailable distance modifiers:\n  ")
+    print(join(collect(keys(DistanceModifierFn)), "\n  "))
+    println("")
+end
+
+if pargs["%COMMAND%"] == "distfuncs"
+    print_distance_functions()
+    exit(0)
+end
+
+# Create a distance object from the arguments
+function create_distance(args)
+
+    distdescription = args["distance"]
+    verbose = args["verbose"]
+    modifierdescription = get(args, "modifier", nothing)
+
+    if haskey(DistancesFn, distdescription)
+        dist = DistancesFn[distdescription](args)
+    else
+        # Use Levenshtein matching on the keys to try and find the closest
+        # one and then assume it is that one.
+        dd = MultiDistances.find_most_similar(distdescription, collect(keys(DistancesFn)))
+        if verbose
+            println("No distance named $distdescription. Fuzzy matching found $dd")
+        end
+        dist = DistancesFn[dd](args)
+    end
+
+    if modifierdescription != nothing && can_be_modified(dist)
+        md = MultiDistances.find_most_similar(modifierdescription, 
+                collect(keys(DistanceModifierFn)))
+        if verbose
+            println("Using modifier $md.")
+        end
+        dist = DistanceModifierFn[md](dist)
+    end
+
+    dist
+end
+
+function write_float_matrix_to_csv(csvfile::String, m::Matrix{Float64}, names::Vector{String})
+    open(csvfile, "w") do fh
+        println(fh, "File," * join(names, ","))
+        for i in 1:size(m, 1)
+            print(fh, names[i])
+            for j in 1:size(m, 2)
+                print(fh, "," * string(m[i, j]))
+            end
+            if i < size(m, 1)
+                print(fh, "\n")
+            end
+        end
+    end
+end
+
+function distmatrix_filename(distance, prefix = "distances_", postfix = ".csv")
+    dn = replace(string(distance), r"-_" => "")
+    dn = replace(dn, "(" => "_")
+    dn = replace(dn, ")" => "_")
+    dn = replace(dn, "{" => "_")
+    dn = replace(dn, "}" => "_")
+    dn = replace(dn, "=" => "")
+    dn = replace(dn, r", ?" => "_")
+    timestamp = Libc.strftime("_%Y%m%d_%H%M%S", time())
+    name = prefix * dn * timestamp * postfix
+    # Ensure not multiple underscores in sequence
+    replace(name, r"_+" => "_")
+end
+
+fileextensionin(fn, extensions) = last(splitext(fn)) ∈ extensions
+
+# Expand a list of extensions provided as arg on command line to array
+# of them that we can match on.
+function extensions_from_extension_spec_arg(extspec)
+    exts = map(strip, split(extspec, ","))
+    for e in copy(exts)
+        if e[1:1] != "."
+            push!(exts, "." * e)
+        end
+    end
+    unique(exts)
+end
+
+function find_files(dir, args)
+    extensions = extensions_from_extension_spec_arg(args["file-extensions"]) 
+    if args["recurse"]
+        fs = String[]
+        for (root, dirs, files) in walkdir(dir)
+            for file in files
+                if fileextensionin(file, extensions)
+                    push!(fs, joinpath(root, file))
+                end
+            end
+        end
+    else
+        fs = filter(fn -> fileextensionin(fn, extensions), readdir(dir))
+        fs = map(fn -> joinpath(dir, fn), fs)
+    end
+    return fs
+end
+
+function main(pargs)
+    distance = create_distance(pargs)
+
+    if pargs["%COMMAND%"] == "dist"
+
+        f1 = pargs["dist"]["file1"]
+        f2 = pargs["dist"]["file2"]
+        distval = MultiDistances.file_distance(distance, f1, f2)
+
+        if pargs["verbose"]
+            println("Distance is: $distval")
+        else
+            println(distval)
+        end
+
+    elseif pargs["%COMMAND%"] == "distances"
+
+        dir = pargs["distances"]["dir"]
+        filenames = find_files(dir, pargs)
+
+        pargs["verbose"] && println("Reading contents of files")
+        filecontents = map(f -> read(f, String), filenames)
+
+        pargs["verbose"] && println("Calculating pairwise distances")
+        dm = MultiDistances.distance_matrix(distance, filecontents; 
+                precalc = pargs["distances"]["precalc"])
+
+        dmfilename = distmatrix_filename(distance)
+        write_float_matrix_to_csv(dmfilename, dm, filenames)
+        pargs["verbose"] && println("Wrote distance matrix to file: $dmfilename")
+
+    elseif pargs["%COMMAND%"] == "query"
+
+        pargs["verbose"] && println("Reading contents of files")
+
+        queryfile = pargs["query"]["file"]
+        querycontents = read(queryfile, String)
+
+        dir = pargs["query"]["dir"]
+        filenames = find_files(dir, pargs)
+        filecontents = map(f -> read(f, String), filenames)
+
+        similarities = map(fc -> compare(distance, querycontents, fc), filecontents)
+
+        ps = sortperm(similarities)
+
+        F = length(filenames)
+        N = min(pargs["query"]["n"], F)
+
+        println("Most similar files:")
+        for i in 1:N
+            idx = ps[F-i+1]
+            s = similarities[idx]
+            fn = filenames[idx]
+            println("  $i. $fn, $s")
+        end
+
+        println("\nMost distant files:")
+        for i in 1:N
+            idx = ps[i]
+            similarity = similarities[idx]
+            filename = filenames[idx]
+            println("  $(i). $(filename), $(similarity)")
+        end
+
+    elseif pargs["%COMMAND%"] == "license"
+
+        lic_path = joinpath(dirname(pathof(MultiDistances)), "..", "LICENSE.md")
+        println(read(lic_path, String))
+
+    elseif pargs["%COMMAND%"] == "version"
+
+        AbsPath = "/usr/src/MultiDistances" # a hack but these files are not in the git so not in the installed MultiDistances...
+
+        println("mdist command for calculating file distances")
+
+        version_path = joinpath(AbsPath, "VERSION")
+        if isfile(version_path)
+            print("version " * strip(read(version_path, String)))
+        end
+
+        timestamp_path = joinpath(AbsPath, "TIMESTAMP")
+        if isfile(timestamp_path)
+            print(", " * strip(read(timestamp_path, String)))
+        end
+
+        gitid_path = joinpath(AbsPath, "LATESTGITID")
+        if isfile(gitid_path)
+            print(", " * strip(read(gitid_path, String)))
+        end
+
+        println("\nby Robert Feldt, robert.feldt@gmail.com")
+        
+    else
+        error("Unknown command")
+        exit(-1)
+    end
+
+    exit(0)
+end
+
+main(pargs)
