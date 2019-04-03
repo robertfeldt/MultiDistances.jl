@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
-SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-echo "$SCRIPTPATH"
-/usr/bin/env julia --color=yes "$SCRIPTPATH"/mdistmain "$@"
+
+#SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+#/usr/bin/env julia --color=yes "$SCRIPTPATH"/mdistmain "$@"
+
+# Let's hardcode the path to the main script when run inside the docker container:
+/usr/bin/env julia --color=yes /usr/src/MultiDistances/bin/mdistmain "$@"
