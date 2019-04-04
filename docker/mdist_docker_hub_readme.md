@@ -30,11 +30,13 @@ Here we use the ncd-bzip2 distance function:
 
 ### Calculate distance matrix for a set of files
 
-Here between all files in the directory some/dir using the Levenshtein distance:
+Here between all files in the directory some/dir using the Jaccard distance:
 
-    docker run -it -v "$PWD":/data robertfeldt/mdist mdist -d levenshtein distances some/dir
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist -d jaccard distances some/dir
 
-This will output a file distances.csv which contains the full distance matrix.
+This will output a file distances.csv which contains the full distance matrix. For distances based on q-grams (cosine, jaccard, overlap, qgram, sorensendice) we can speed up processing by pre-calculation:
+
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist -d jaccard distances --precalc some/dir
 
 Note that some/dir must be mapped into the docker container so since we map "$PWD" into /data (in the docker container) some/dir must be available below "$PWD". If you want to calc distances of files in an absolute path /my/abs/path/dir-with-my-files do:
 
