@@ -4,7 +4,7 @@ Pkg.activate("/usr/src/MultiDistances"); # So that we use right versions of pack
 using ArgParse
 
 function exiterror(str)
-    println(str)
+    printstyled(str, color = :red)
     exit(-1)
 end
 
@@ -289,6 +289,10 @@ function main(pargs)
 
         dir = pargs["distances"]["dir"]
         filenames = find_files(dir, pargs)
+        if length(filenames) < 1
+            fileexts = pargs["file-extensions"]
+            exiterror("Found no files with extensions $(fileexts)! Exiting...")
+        end
 
         pargs["verbose"] && println("Reading contents of files")
         filecontents = map(f -> read(f, String), filenames)

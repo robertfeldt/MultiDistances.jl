@@ -53,10 +53,11 @@ RUN cd /usr/src/MultiDistances && julia -e 'using Pkg; Pkg.activate("."); Pkg.AP
 ## Set up our commands
 ########################
 
-## Link our main command so that it is in the path and executable.
-RUN ln -s /usr/src/MultiDistances/bin/mdist /usr/bin/mdist \
+## Link our main commands so that they are in the path and executable.
+RUN ln -s /usr/src/MultiDistances/bin/runmdist /usr/bin/mdist \
 &&  chmod +x /usr/bin/mdist \
-&&  chmod +x /usr/src/MultiDistances/bin/mdist
+&&  chmod +x /usr/src/MultiDistances/bin/runmdist \
+&&  chmod +x /usr/src/MultiDistances/bin/mdistmain
 
 
 ########################
