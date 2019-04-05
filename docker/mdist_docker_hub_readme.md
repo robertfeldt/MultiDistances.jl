@@ -52,6 +52,14 @@ Find the four most similar and distant files to a file qfile when comparing it t
 
     docker run -it -v "$PWD":/data robertfeldt/mdist mdist --distance ncd-xz -r --file-extensions "txt,md" query qfile dir -n 4
 
+### Order files in diversity sequence
+
+Order files (found in directory some/dir) by diversity, i.e. so that we at each step in the order tries to maximize the diversity up to that size:
+
+    docker run -it -v "$PWD":/data robertfeldt/mdist mdist -d jaccard --file-extensions "txt,md" divseq --order maximin some/dir
+
+Currently only the maximin order is supported, i.e. greedily select the next file that has the maximum minimum distance to one of the files already in the order. The first two files are the ones with the maximum distance.
+
 ### View license
 
 View license information:

@@ -57,3 +57,9 @@ function MaxiMinDiversitySequence(distance, objects::Vector{O}; showprogress = f
     selectionorder = find_maximin_sequence(dm)
     DiversitySequence{O}(length(objects), objects, strings, selectionorder)
 end
+
+function MaxiMinDiversitySequence(distance, objects::Vector{O}, strings::Vector{String}, dm::Matrix{Float64}) where O
+    selectionorder = find_maximin_sequence(dm)
+    DiversitySequence{O}(length(objects), objects, strings, selectionorder)
+end
+

@@ -51,6 +51,9 @@ function parse_args(args)
         "query"
             help = "find the most similar and distant files given a query file"
             action = :command
+        "divseq"
+            help = "order files in a sequence by diversity"
+            action = :command
         "license"
             help = "print the license"
             action = :command
@@ -74,6 +77,14 @@ function parse_args(args)
             required = true
         "file2"
             help = "second file"
+            required = true
+    end
+
+    @add_arg_table s["divseq"] begin
+       "--order"
+            help = "diversity ordering method (default: maximin)"
+       "dir"
+            help = "directory with files to calculate distances of"
             required = true
     end
 
@@ -304,6 +315,37 @@ function main(pargs)
         dmfilename = distmatrix_filename(distance)
         write_float_matrix_to_csv(dmfilename, dm, filenames)
         pargs["verbose"] && println("Wrote distance matrix to file: $dmfilename")
+
+    elseif pargs["%COMMAND%"] == "divseq"
+
+        dir = pargs["divseq"]["dir"]
+        filenames = find_files(dir, pargs)
+        if length(filenames) < 1
+            fileexts = pargs["file-extensions"]
+            exiterror("Found no files with extensions $(fileexts)! Exiting...")
+        end
+
+        pargs["verbose"] && println("Reading contents of files")
+        filecontents = map(f -> read(f, String), filenames)
+
+        pargs["verbose"] && println("Calculating pairwise distances")
+        dm = MultiDistances.distance_matrix(distance, filecontents;
+                showprogress = true, precalc = true)
+
+        pargs["verbose"] && println("Ordering files by diversity")
+        seq = MultiDistances.MaxiMinDiversitySequence(distance, filecontents, filecontents, dm)
+
+        for i in eachindex(seq.order)
+            idx = seq.order[i]
+            if i > 1
+                previdxs = seq.order[1:(i-1)]
+                dval, mmidx = findmin(view(dm, idx, previdxs))
+                fn = filenames[previdxs[mmidx]]
+                println("$(i). $(filenames[idx]), $(dval) ($(fn))")
+            else
+                println("$(i). $(filenames[idx])")
+            end
+        end
 
     elseif pargs["%COMMAND%"] == "query"
 
