@@ -15,5 +15,6 @@ include("precalc_string_distances.jl")
 
 include("ncd.jl")
 include("distance_matrix.jl")
+include("diversity_sequence.jl")
 
 end
