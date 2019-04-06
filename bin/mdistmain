@@ -1,6 +1,7 @@
 #!/usr/bin/env julia
 using Pkg
-Pkg.activate("/usr/src/MultiDistances"); # So that we use right versions of packages below...
+const LibDir = joinpath(dirname(@__FILE__), "..")
+Pkg.activate(LibDir); # So that we use right versions of packages below...
 using ArgParse
 
 function exiterror(str)

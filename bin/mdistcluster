@@ -1,0 +1,20 @@
+#!/usr/bin/env julia
+using Pkg
+Pkg.activate("/usr/src/MultiDistances"); # So that we use right versions of packages below...
+using ArgParse
+using Clustering
+using DataFrames
+
+function cluster_based_on_args(distmatrix, args)
+    clusterarg = lowercase(args["distances"]["cluster"])
+
+    md = match(r"kmedoids\(\s*(\d+)\s*\)", clusterarg)
+    if md != nothing
+        numclusters = parse(Int, md[1])
+        result = kmedoids(distmatrix, numclusters)
+        haveclustered = true
+        println("Kmedoids " * (result.converged ? "converged" : "did NOT converge") * "!")        
+    else
+        exiterror("Cannot cluster according to $(args["distances"]["cluster"])")
+    end
+end
