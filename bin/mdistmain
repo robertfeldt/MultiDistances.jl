@@ -334,7 +334,12 @@ function main(pargs)
                 showprogress = true, precalc = true)
 
         pargs["verbose"] && println("Ordering files by diversity")
-        seq = MultiDistances.MaxiMinDiversitySequence(distance, filecontents, filecontents, dm)
+        orderarg = lowercase(pargs["divseq"]["order"])
+        if in(orderarg, ["maximin", "maxi-min"])
+            seq = MultiDistances.MaxiMinDiversitySequence(distance, filecontents, filecontents, dm)
+        elseif in(orderarg, ["maximean", "maxi-mean", "maxisum", "maxi-sum"])
+            seq = MultiDistances.MaxiMeanDiversitySequence(distance, filecontents, filecontents, dm)
+        end
 
         for i in eachindex(seq.order)
             idx = seq.order[i]

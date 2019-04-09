@@ -63,3 +63,56 @@ function MaxiMinDiversitySequence(distance, objects::Vector{O}, strings::Vector{
     DiversitySequence{O}(length(objects), objects, strings, selectionorder)
 end
 
+# TODO: Generalize this so we can reuse the GreedyGrow code which both MaxiMin and MaxiMean uses.
+
+# Given a distance matrix, calculate the maxi-mean (aka maxi-sum) diversity sequence, 
+# i.e. add the object with the largest (maxi) sum of distances to the objects already 
+# in the sequence.
+# This means we start from the two objects that have the largest distance between them
+# and then grow greedily from there.
+function find_maximean_sequence(dm::AbstractMatrix{Float64}, maxsize::I = size(dm, 1)) where {I<:Integer}
+    # Setup
+    N = size(dm, 1)
+    selected = Int[]
+    unselected = Set(1:N)
+
+    # Add the two elements with largest distance
+    maxdist, idx = findmax(dm)
+    push!(selected, idx[1])
+    push!(selected, idx[2])
+    pop!(unselected, idx[1])
+    pop!(unselected, idx[2])
+
+    sumdistances = vec(sum(view(dm, :, selected), dims=2))
+
+    while length(selected) < min(maxsize, N)
+        # Find the unselected one with maximum sum distance to selected ones
+        idx = first(unselected)
+        for i in 2:length(unselected)
+            if sumdistances[i] > sumdistances[idx]
+                idx = i
+            end
+        end
+        push!(selected, idx)
+        pop!(unselected, idx)
+
+        # Now we need to update sumdistances since we have a new selected one
+        for i in unselected
+            sumdistances[i] += dm[i, idx]
+        end
+    end
+
+    selected # Return the order in which we selected them
+end
+
+function MaxiMeanDiversitySequence(distance, objects::Vector{O}; showprogress = false) where O
+    strings = String[string(o) for o in objects]
+    dm = distance_matrix(distance, strings; showprogress = showprogress, precalc = true)
+    selectionorder = find_maximean_sequence(dm)
+    DiversitySequence{O}(length(objects), objects, strings, selectionorder)
+end
+
+function MaxiMeanDiversitySequence(distance, objects::Vector{O}, strings::Vector{String}, dm::Matrix{Float64}) where O
+    selectionorder = find_maximean_sequence(dm)
+    DiversitySequence{O}(length(objects), objects, strings, selectionorder)
+end
