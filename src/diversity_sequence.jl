@@ -14,6 +14,14 @@ struct DiversitySequence{A}
     order::Vector{Int}   # Permutation vector, i.e. the order in which objects come in the sequence
 end
 
+function ranks(ds::DiversitySequence)
+    rankvec = zeros(Int, ds.maxsize)
+    for i in eachindex(ds.order)
+        rankvec[ds.order[i]] = i
+    end
+    rankvec
+end
+
 # Given a distance matrix, calculate the maxi-min diversity sequence, i.e. add the object
 # with the largest (maxi) minimum (min) distance to the objects already in the sequence.
 # This means we start from the two objects that have the largest distance between them
