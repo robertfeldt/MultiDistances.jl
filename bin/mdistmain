@@ -279,6 +279,14 @@ function find_files(dir, args)
         fs = filter(fn -> fileextensionin(fn, extensions), readdir(dir))
         fs = map(fn -> joinpath(dir, fn), fs)
     end
+
+    if length(fs) < 1
+        fileexts = args["file-extensions"]
+        exiterror("Found no files with extensions $(fileexts)! Exiting...")
+    else
+        args["verbose"] && println("Found $(length(fs)) files in $(dir)")
+    end
+
     return fs
 end
 
@@ -301,10 +309,6 @@ function main(pargs)
 
         dir = pargs["distances"]["dir"]
         filenames = find_files(dir, pargs)
-        if length(filenames) < 1
-            fileexts = pargs["file-extensions"]
-            exiterror("Found no files with extensions $(fileexts)! Exiting...")
-        end
 
         pargs["verbose"] && println("Reading contents of files")
         filecontents = map(f -> read(f, String), filenames)
@@ -321,10 +325,6 @@ function main(pargs)
 
         dir = pargs["divseq"]["dir"]
         filenames = find_files(dir, pargs)
-        if length(filenames) < 1
-            fileexts = pargs["file-extensions"]
-            exiterror("Found no files with extensions $(fileexts)! Exiting...")
-        end
 
         pargs["verbose"] && println("Reading contents of files")
         filecontents = map(f -> read(f, String), filenames)
@@ -355,13 +355,12 @@ function main(pargs)
 
     elseif pargs["%COMMAND%"] == "query"
 
-        pargs["verbose"] && println("Reading contents of files")
-
         queryfile = pargs["query"]["file"]
         querycontents = read(queryfile, String)
 
         dir = pargs["query"]["dir"]
         filenames = find_files(dir, pargs)
+        pargs["verbose"] && println("Reading contents of files")
         filecontents = map(f -> read(f, String), filenames)
 
         similarities = map(fc -> compare(distance, querycontents, fc), filecontents)
