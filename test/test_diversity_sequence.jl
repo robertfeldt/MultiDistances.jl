@@ -53,4 +53,10 @@ end
     @test in(o, [[1, 3, 2, 4], [3, 1, 2, 4], [1, 4, 3, 2], [4, 1, 3, 2]])
 end
 
+@testset "Few objects" begin
+    d = Jaccard(2)
+    @test_throws AssertionError MaxiMinDiversitySequence(d, [1])
+    @test_throws AssertionError MaxiMeanDiversitySequence(d, [1])
+end
+
 end

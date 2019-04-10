@@ -29,6 +29,7 @@ end
 function find_maximin_sequence(dm::AbstractMatrix{Float64}, maxsize::I = size(dm, 1)) where {I<:Integer}
     # Setup
     N = size(dm, 1)
+    @assert N >= 2
     selected = Int[]
     unselected = Set(1:N)
 
@@ -81,6 +82,7 @@ end
 function find_maximean_sequence(dm::AbstractMatrix{Float64}, maxsize::I = size(dm, 1)) where {I<:Integer}
     # Setup
     N = size(dm, 1)
+    @assert N >= 2
     selected = Int[]
     unselected = Set(1:N)
 
