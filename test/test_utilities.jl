@@ -3,7 +3,7 @@ using StringDistances
 @testset "utilities" begin
 
 @testset "file_distance and file_similarity" begin
-    d = Hamming()
+    d = Levenshtein()
 
     @test 1.0 ≈ file_similarity(d, "data/martha.txt", "data/martha.txt") atol=0.001
     @test 0.0 ≈ file_distance(d,   "data/martha.txt", "data/martha.txt") atol=0.001

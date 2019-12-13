@@ -1,9 +1,13 @@
 using StringDistances
-using StringDistances: param, QGramIterator, AbstractQGram
+using StringDistances: QGramIterator, QGramDistance
 
-function qgram_count_dict(iter::QGramIterator{T, N}) where {T, N}
-	d = Dict{T, UInt}()
-    sizehint!(d, iter.l) # Number of qgrams is on the order of the length of the orig string/sequence
+function qparam(d::QGramDistance)
+    d.q
+end
+
+function qgram_count_dict(iter::QGramIterator{<:AbstractString})
+	d = Dict{eltype(iter), UInt}()
+    sizehint!(d, length(iter.s)) # Number of qgrams is on the order of the length of the orig string/sequence
     for qgram in iter
 		index = Base.ht_keyindex2!(d, qgram)
 		if index > 0
@@ -19,22 +23,20 @@ end
 
 struct SortedQGramCounts{T}
     qgramcounts::Array{Pair{T,UInt},1} # We assume these are sorted by key (T)
-
-    function SortedQGramCounts{T}(iter::QGramIterator{T, N}) where {T, N}
-        sorted = sort!(collect(qgram_count_dict(iter)), by = kv -> first(kv))
-        new{T}(sorted)
-    end    
 end
-SortedQGramCounts(iter::QGramIterator{T, N}) where {T, N} = SortedQGramCounts{T}(iter)
+function SortedQGramCounts(iter::QGramIterator{<:AbstractString})
+    sorted = sort!(collect(qgram_count_dict(iter)), by = kv -> first(kv))
+    SortedQGramCounts{eltype(iter)}(sorted)
+end    
 
 # Default is to not precalc.
 precalculate(dist, s) = s
 
 # But we introduce precalculation by the qgram count pairs sorted by qgram.
 # This way we can just iterate through them later to compare their counts.
-function precalculate(dist::AbstractQGram, s::AbstractString)
-    N = StringDistances.param(dist)
-    iter = QGramIterator{typeof(s), N}(s, length(s))
+function precalculate(dist::QGramDistance, s::AbstractString)
+    N = qparam(dist)
+    iter = StringDistances.qgram(s, N)
     SortedQGramCounts(iter)
 end
 
@@ -43,7 +45,7 @@ struct CountIteratorQGramCounts{T}
     sqc2::Array{Pair{T, UInt}, 1}
 end
 
-function evaluate(dist::AbstractQGram, q1::SortedQGramCounts{T}, q2::SortedQGramCounts{T}) where {T}
+function evaluate(dist::QGramDistance, q1::SortedQGramCounts{T}, q2::SortedQGramCounts{T}) where {T}
 	StringDistances.evaluate(dist, CountIteratorQGramCounts{T}(q1.qgramcounts, q2.qgramcounts))
 end
 
