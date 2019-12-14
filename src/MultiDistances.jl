@@ -1,7 +1,7 @@
 module MultiDistances
 
 import StringDistances: PreMetric, compare, evaluate, Levenshtein
-using CodecZlib, CodecXz, CodecZstd, CodecBzip2, CodecLz4
+using CodecZlib, CodecXz, CodecZstd, CodecBzip2, CodecLz4, TranscodingStreams
 
 export file_distance, file_similarity,
        NCD, evaluate, compare

@@ -1,4 +1,6 @@
-function compressed_length(str::S, compressor = ZlibCompressor) where {S<:Union{AbstractString,AbstractArray{UInt8}}}
+const DefaultCompressor = Bzip2Compressor()
+
+function compressed_length(str::S, compressor = DefaultCompressor) where {S<:Union{AbstractString,AbstractArray{UInt8}}}
     length(transcode(compressor, str))
 end
 
@@ -14,6 +16,11 @@ abstract type CompressionDistance <: PreMetric end
 
 struct NCD <: CompressionDistance
     compressor
+    NCD(C) = begin
+        c = C()
+        TranscodingStreams.initialize(c)
+        new(c)
+    end
 end
 
 function ncdcalc(lenc1::I, lenc2::I, lenc12::I) where {I<:Integer}

@@ -2,6 +2,9 @@
 # so we should not need to do more. We might need to ensure precompilation though?
 using Pkg
 
+Pkg.add("TranscodingStreams")
+using TranscodingStreams
+
 Pkg.add("Distances")
 using Distances
 

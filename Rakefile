@@ -73,6 +73,7 @@ task :build_docker_image do
   docker_build_image("docker/mdist.Dockerfile",
     DockerUser, DockerImageName, Tag
   )
+  print("Don't forget to run: rake dockertest")
 end
 task :build => :build_docker_image
 task :bdi => :build_docker_image
