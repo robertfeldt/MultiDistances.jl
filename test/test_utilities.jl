@@ -21,4 +21,9 @@ using StringDistances
     @test 1.0 ≈ file_similarity(Partial(Levenshtein()), "data/new_york_yankees.txt", "data/yankees.txt") atol=0.001
 end
 
+@testset "find_most_similar" begin
+    @test MultiDistances.find_most_similar("a", ["a", "b"]) == "a"
+    @test MultiDistances.find_most_similar("a", ["b3", "cd", "a2"]) == "a2"
+end
+
 end
