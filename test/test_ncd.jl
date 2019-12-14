@@ -33,6 +33,10 @@ end
 
         # We found a bug with LZ4Compressor and Base.CodeUnits{UInt8,String} so try it here:
         @test 0.0 <= evaluate(d, b"DATA\xff\u2200", b"KATA\xff\u2200") <= 1.0
+
+        # Can also create NCD from an actual codec
+        d = NCD(C())
+        @test evaluate(d, "a", "b") == ed
     end
 end
 

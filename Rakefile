@@ -73,7 +73,7 @@ task :build_docker_image do
   docker_build_image("docker/mdist.Dockerfile",
     DockerUser, DockerImageName, Tag
   )
-  print("Don't forget to run: rake dockertest")
+  print("Don't forget to run: rake dockertest\n")
 end
 task :build => :build_docker_image
 task :bdi => :build_docker_image
@@ -122,6 +122,7 @@ task :dockertest do
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-lz4 --verbose -r --file-extensions \"txt,jl\" query test/runtests.jl test"
   sh "rm distances_*_*.csv"
 end
+task :dt => :dockertest
 
 desc "Clean docker build"
 task :cleandocker do

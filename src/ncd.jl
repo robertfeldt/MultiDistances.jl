@@ -16,12 +16,12 @@ abstract type CompressionDistance <: PreMetric end
 
 struct NCD <: CompressionDistance
     compressor
-    NCD(C) = begin
-        c = C()
+    NCD(c::C) where {C<:TranscodingStreams.Codec} = begin
         TranscodingStreams.initialize(c)
         new(c)
     end
 end
+NCD(c::Type{<:TranscodingStreams.Codec}) = NCD(c())
 
 function ncdcalc(lenc1::I, lenc2::I, lenc12::I) where {I<:Integer}
     minval, maxval = minmax(lenc1, lenc2)
