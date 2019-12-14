@@ -129,7 +129,6 @@ DistancesFn = Dict(
     # Edit dist funcs don't care about q or level (l)
     "levenshtein" => (a) -> Levenshtein(),
     "jaro" => (a) -> Jaro(),
-    "hamming" => (a) -> Hamming(),
 
     "ratcliffobershelp" => (a) -> RatcliffObershelp(),
     "ratcliff-obershelp" => (a) -> RatcliffObershelp(),
@@ -388,7 +387,7 @@ function main(pargs)
         pargs["verbose"] && println("Reading contents of files")
         filecontents = map(f -> read(f, String), filenames)
 
-        similarities = map(fc -> compare(distance, querycontents, fc), filecontents)
+        similarities = map(fc -> compare(querycontents, fc, distance), filecontents)
 
         ps = sortperm(similarities)
 
