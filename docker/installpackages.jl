@@ -2,9 +2,6 @@
 # so we should not need to do more. We might need to ensure precompilation though?
 using Pkg
 
-Pkg.add(PackageSpec(url="https://github.com/invenia/CodecLz4.jl.git", rev="master"))
-using CodecLz4
-
 Pkg.add("Distances")
 using Distances
 
@@ -25,6 +22,10 @@ using CodecZstd
 
 Pkg.add("CodecBzip2")
 using CodecBzip2
+
+#Pkg.add(PackageSpec(url="https://github.com/invenia/CodecLz4.jl.git", rev="master"))
+Pkg.add("CodecLz4")
+using CodecLz4
 
 Pkg.add("JSON")
 using JSON

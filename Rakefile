@@ -119,6 +119,7 @@ task :dockertest do
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-bzip2 --verbose -r --file-extensions \"txt,jl\" query test/runtests.jl test"
   print("\n")
   sh "docker run -it -v \"$PWD\":/data #{DockerUser}/#{DockerImageName}:#{Tag} mdist --distance ncd-lz4 --verbose -r --file-extensions \"txt,jl\" query test/runtests.jl test"
+  sh "rm distances_*_*.csv"
 end
 
 desc "Clean docker build"
