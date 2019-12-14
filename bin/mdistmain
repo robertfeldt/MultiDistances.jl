@@ -387,7 +387,16 @@ function main(pargs)
         pargs["verbose"] && println("Reading contents of files")
         filecontents = map(f -> read(f, String), filenames)
 
-        similarities = map(fc -> compare(querycontents, fc, distance), filecontents)
+        similarities = if pargs["verbose"]
+            idx = 1
+            map(filecontents) do fc
+                println("Similarity to file: ", filenames[idx])
+                idx += 1
+                compare(querycontents, fc, distance)
+            end
+        else
+            map(fc -> compare(querycontents, fc, distance), filecontents)
+        end
 
         ps = sortperm(similarities)
 
