@@ -26,4 +26,4 @@ end
 
 # Note that ncd can return negative similarity values since it is not
 # using a perfect compressor, i.e. Kolmogorov.
-compare(ncd::NCD, s1::AbstractString, s2::AbstractString) = 1.0 - evaluate(ncd, s1, s2)
+compare(s1::AbstractString, s2::AbstractString, ncd::NCD) = 1.0 - evaluate(ncd, s1, s2)

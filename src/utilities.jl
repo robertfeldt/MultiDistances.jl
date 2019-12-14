@@ -12,6 +12,5 @@ function find_most_similar(query::S,
     strings::Vector{S}, distance = Levenshtein()) where {S<:AbstractString}
 
     similarities = map(s -> compare(s, query, distance), strings)
-    #similarities = map(s -> compare(distance, s, query), strings)
     strings[last(findmax(similarities))]
 end
