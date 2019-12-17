@@ -98,7 +98,7 @@ function find_maximean_sequence(dm::AbstractMatrix{Float64}, maxsize::I = size(d
     while length(selected) < min(maxsize, N)
         # Find the unselected one with maximum sum distance to selected ones
         idx = first(unselected)
-        for i in 2:length(unselected)
+        for i in unselected
             if sumdistances[i] > sumdistances[idx]
                 idx = i
             end
