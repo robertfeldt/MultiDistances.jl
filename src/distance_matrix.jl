@@ -34,11 +34,9 @@ function distance_matrix(distance, strings::Vector{String};
     end
 
     for i in 1:n
-        for j in i:n
+        for j in (i+1):n
             dm[j, i] = dm[i, j] = safeevaluate(distance, precalced[i], precalced[j])
-            if showprogress
-                next!(p)
-            end
+            showprogress && next!(p)
         end
     end
 
