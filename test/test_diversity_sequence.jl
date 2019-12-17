@@ -61,7 +61,6 @@ end
     # and it could be: [a,b] or [b,a]
     # Expected Result: ["Oi", "Hello", "Heja", "Ola", "Helo"]
     @test in(object_ranking, [[3,1,5,4,2], [1,3,5,4,2]])
-
 end
 
 @testset "Few objects" begin
@@ -70,12 +69,18 @@ end
     @test_throws AssertionError MaxiMeanDiversitySequence(d, [1])
 end
 
-@testset "Right matrix removal order" begin
+@testset "Right matrix removal order in find_maximean_sequence" begin
     #Example of a distance matrix that throws exception in the maximean divseq algorithm
     dm = [[0.0, 5.0, 10.0, 2.0, 1.0] [5.0, 0.0, 7.0, 1.0, 1.0] [10.0, 7.0, 0.0 ,1.0, 1.0] [ 2.0, 1.0, 1.0 ,0.0, 1.0] [ 2.0, 1.0, 1.0 ,1.0, 0.0]]
     object_ranking = find_maximean_sequence(dm)     
     @test in(object_ranking, [[1,3,2,4,5], [3,1,2,4,5]])
 end
+
+@testset "Right matrix removal order in find_maximin_sequence" begin
+    dm = [[0.0, 5.0, 10.0, 2.0] [5.0, 0.0, 7.0, 1.0] [10.0, 7.0, 0.0, 1.5] [2.0, 1.0, 1.5, 0.0]]
+    object_ranking = find_maximin_sequence(dm)
+    @test in(object_ranking, [[1, 3, 4, 2], [3, 1, 4, 2]])
+end # @testset "Right matrix removal order in find_maximin_sequence" begin
 
 @testset "Short strings can give NaN distances" begin
     strs = ["C", "2mGO", "1"]
