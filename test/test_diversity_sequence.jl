@@ -52,8 +52,7 @@ end
     o = seq.order
     @test in(o, [[1, 3, 2, 4], [3, 1, 2, 4], [1, 4, 3, 2], [4, 1, 3, 2]])
 
-    # Distance Matrix for the next case below. Using Jaccard (2)
-    # Used Levenshtein since its easier to debug, and skip qgram sizes
+    # Using Levenshtein since its easier to debug, and skip qgram sizes
     other_objects = ["Hello", "Helo", "Oi", "Ola", "Heja"]
     sequence = MaxiMeanDiversitySequence(Levenshtein(), other_objects)
     object_ranking = sequence.order
@@ -71,6 +70,7 @@ end
 end
 
 @testset "Right matrix removal order" begin
+#Example of a distance matrix that throws exception in the divseq algorithm
 dm = [[0.0, 5.0, 10.0, 2.0, 1.0] [5.0, 0.0, 7.0, 1.0, 1.0] [10.0, 7.0, 0.0 ,1.0, 1.0] [ 2.0, 1.0, 1.0 ,0.0, 1.0] [ 2.0, 1.0, 1.0 ,1.0, 0.0]]
 object_ranking = find_maximean_sequence(dm)     
 @test in(object_ranking, [[1,3,2,4,5], [3,1,2,4,5]])
