@@ -1,5 +1,20 @@
 using ProgressMeter
 
+# Since eval sometimes returns NaN we have a safe version here for use in distance matrix
+# calculations.
+function safeevaluate(distance, s1, s2)
+    d = evaluate(distance, s1, s2)
+    if isnan(d)
+        if string(s1) == string(s2)
+            return 0.0
+        else
+            return 1.0 # This might not be safe for all distances though!!
+        end
+    else
+        return d
+    end
+end
+
 function distance_matrix(distance, strings::Vector{String}; 
             showprogress = true,
             precalc = true)
@@ -20,7 +35,7 @@ function distance_matrix(distance, strings::Vector{String};
 
     for i in 1:n
         for j in i:n
-            dm[j, i] = dm[i, j] = evaluate(distance, precalced[i], precalced[j])
+            dm[j, i] = dm[i, j] = safeevaluate(distance, precalced[i], precalced[j])
             if showprogress
                 next!(p)
             end
