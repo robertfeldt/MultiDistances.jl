@@ -1,5 +1,6 @@
 using MultiDistances: MaxiMinDiversitySequence, DiversitySequence
 using MultiDistances: MaxiMeanDiversitySequence, find_maximean_sequence
+using StringDistances: Jaccard
 
 has_same_elements(a, b) = (length(a) == length(b)) && all(be -> in(be, a), b)
 
@@ -70,10 +71,21 @@ end
 end
 
 @testset "Right matrix removal order" begin
-#Example of a distance matrix that throws exception in the divseq algorithm
-dm = [[0.0, 5.0, 10.0, 2.0, 1.0] [5.0, 0.0, 7.0, 1.0, 1.0] [10.0, 7.0, 0.0 ,1.0, 1.0] [ 2.0, 1.0, 1.0 ,0.0, 1.0] [ 2.0, 1.0, 1.0 ,1.0, 0.0]]
-object_ranking = find_maximean_sequence(dm)     
-@test in(object_ranking, [[1,3,2,4,5], [3,1,2,4,5]])
+    #Example of a distance matrix that throws exception in the maximean divseq algorithm
+    dm = [[0.0, 5.0, 10.0, 2.0, 1.0] [5.0, 0.0, 7.0, 1.0, 1.0] [10.0, 7.0, 0.0 ,1.0, 1.0] [ 2.0, 1.0, 1.0 ,0.0, 1.0] [ 2.0, 1.0, 1.0 ,1.0, 0.0]]
+    object_ranking = find_maximean_sequence(dm)     
+    @test in(object_ranking, [[1,3,2,4,5], [3,1,2,4,5]])
+end
+
+@testset "Short strings can give NaN distances" begin
+    strs = ["C", "2mGO", "1"]
+    dist = Jaccard(2)
+    try
+        divseq = MaxiMinDiversitySequence(dist, strs)
+        @test true
+    catch _err
+        @test false
+    end
 end
 
 end

@@ -21,13 +21,16 @@ function qgram_count_dict(iter::QGramIterator{<:AbstractString})
     d
 end
 
-struct SortedQGramCounts{T}
+struct SortedQGramCounts{T,S}
     qgramcounts::Array{Pair{T,UInt},1} # We assume these are sorted by key (T)
+    s::S
 end
 function SortedQGramCounts(iter::QGramIterator{<:AbstractString})
     sorted = sort!(collect(qgram_count_dict(iter)), by = kv -> first(kv))
-    SortedQGramCounts{eltype(iter)}(sorted)
-end    
+    SortedQGramCounts{eltype(iter), typeof(iter.s)}(sorted, iter.s)
+end
+import Base.string
+string(sqc::SortedQGramCounts) = sqc.s
 
 # Default is to not precalc.
 precalculate(dist, s) = s

@@ -1,4 +1,4 @@
-using MultiDistances: distance_matrix, safeevaluate
+using MultiDistances: distance_matrix, safeevaluate, precalculate
 using StringDistances: Jaccard
 
 @testset "distance_matrix" begin
@@ -18,4 +18,8 @@ end # @testset "Diversity sequences" begin
 
     @test safeevaluate(d, "a", "b") == 1.0
     @test safeevaluate(d, "a", "a") == 0.0
+
+    # Works even if we have precalculated intermediate data structure for strings
+    @test safeevaluate(d, precalculate(d, "a"), precalculate(d, "b")) == 1.0
+    @test safeevaluate(d, precalculate(d, "a"), precalculate(d, "a")) == 0.0
 end
