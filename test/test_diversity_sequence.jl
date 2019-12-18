@@ -1,5 +1,5 @@
 using MultiDistances: MaxiMinDiversitySequence, DiversitySequence
-using MultiDistances: MaxiMeanDiversitySequence, find_maximean_sequence
+using MultiDistances: MaxiMeanDiversitySequence, find_maximean_sequence, find_maximin_sequence
 using StringDistances: Jaccard
 
 has_same_elements(a, b) = (length(a) == length(b)) && all(be -> in(be, a), b)
