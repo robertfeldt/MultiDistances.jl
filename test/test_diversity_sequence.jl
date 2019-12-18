@@ -79,7 +79,10 @@ end
 @testset "Right matrix removal order in find_maximin_sequence" begin
     dm = [[0.0, 5.0, 10.0, 2.0] [5.0, 0.0, 7.0, 1.0] [10.0, 7.0, 0.0, 1.5] [2.0, 1.0, 1.5, 0.0]]
     object_ranking = find_maximin_sequence(dm)
-    @test in(object_ranking, [[1, 3, 4, 2], [3, 1, 4, 2]])
+    # First selects 1,3 or 3,1 since highest diversity (10) 
+    # then selects 2 since its min is 5 which is > than 1.5 which is min for 4
+    # then adds 4.
+    @test in(object_ranking, [[1, 3, 2, 4], [3, 1, 2, 4]])
 end # @testset "Right matrix removal order in find_maximin_sequence" begin
 
 @testset "Short strings can give NaN distances" begin
