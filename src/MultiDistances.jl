@@ -18,5 +18,6 @@ include("distance_matrix.jl")
 include("diversity_sequence.jl")
 
 include("lempel_ziv_dict.jl")
+include("lempel_ziv_jaccard_distance.jl")
 
 end

@@ -73,13 +73,36 @@ function Base.collect(lz::LempelZivIterator{S,SS}) where {S,SS}
     grams
 end
 
+function iterate!(lz::LempelZivIterator{S,SS}) where {S,SS}
+    n = 0
+    for g in lz
+        n += 1
+    end
+    return n
+end
+
+abstract type LempelZivGrams{G} end
+
+struct LempelZivSet{G} <: LempelZivGrams{G}
+    n::Int
+    lzset::Set{G}
+end
+
+Base.in(g::G, lzs::LempelZivSet{G}) where {G} = in(g, lzs.lzset)
+
+function LempelZivSet(s::S) where {S<:AbstractString}
+    lzi = LempelZivSetIterator(s)
+    n = iterate!(lzi)
+    LempelZivSet{eltype(lzi)}(n, lzi.lzset)
+end
+
 Base.getindex(lz::LempelZivIterator{S,SS}, g::SS) where {S,SS} =
     lz.lzdict[g]
 
 substr(s::String) = SubString(s, 1, length(s))
 Base.getindex(lz::LempelZivIterator{String,SubString{String}}, g::String) =
     lz.lzdict[substr(g)]
-
+    
 #function lempelzivset(s::S) where {S<:AbstractString}
 #    lzset = Set{SubString{S}}()
 #    starti, endi = 1, 2

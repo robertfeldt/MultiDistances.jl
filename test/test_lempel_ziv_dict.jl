@@ -1,4 +1,4 @@
-using MultiDistances: lzgrams, LempelZivDictIterator, LempelZivSetIterator
+using MultiDistances: lzgrams, LempelZivDictIterator, LempelZivSetIterator, LempelZivSet
 
 sameset(it1, it2) = sort(collect(it1)) == sort(collect(it2))
 
@@ -57,4 +57,10 @@ end
     @test lzi["bc"] == 2
     @test lzi["bca"] == 1
 
+end
+
+@testset "LempelZivSet" begin
+    s = LempelZivSet("arnear")
+    @test s.n == 5
+    @test in(SubString("arnear", 1, 1), s)
 end
