@@ -87,13 +87,24 @@ struct LempelZivSet{G} <: LempelZivGrams{G}
     n::Int
     lzset::Set{G}
 end
-
 Base.in(g::G, lzs::LempelZivSet{G}) where {G} = in(g, lzs.lzset)
 
 function LempelZivSet(s::S) where {S<:AbstractString}
     lzi = LempelZivSetIterator(s)
     n = iterate!(lzi)
     LempelZivSet{eltype(lzi)}(n, lzi.lzset)
+end
+
+struct LempelZivDict{G} <: LempelZivGrams{G}
+    n::Int
+    lzdict::Dict{G,Int}
+end
+Base.in(g::G, lzd::LempelZivDict{G}) where {G} = haskey(lzd.lzdict, g)
+
+function LempelZivDict(s::S) where {S<:AbstractString}
+    lzi = LempelZivDictIterator(s)
+    n = iterate!(lzi)
+    LempelZivDict{eltype(lzi)}(n, lzi.lzdict)
 end
 
 Base.getindex(lz::LempelZivIterator{S,SS}, g::SS) where {S,SS} =
