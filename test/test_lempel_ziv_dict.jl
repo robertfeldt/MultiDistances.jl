@@ -1,4 +1,5 @@
-using MultiDistances: lzgrams, LempelZivDictIterator, LempelZivSetIterator, LempelZivSet
+using MultiDistances: lzgrams, LempelZivDictIterator, LempelZivSetIterator
+using MultiDistances: LempelZivSet, LempelZivDict
 
 sameset(it1, it2) = sort(collect(it1)) == sort(collect(it2))
 
@@ -63,4 +64,34 @@ end
     s = LempelZivSet("arnear")
     @test s.n == 5
     @test in(SubString("arnear", 1, 1), s)
+    @test in(SubString("arnear", 2, 2), s)
+    @test in(SubString("arnear", 3, 3), s)
+    @test in(SubString("arnear", 4, 4), s)
+    @test in(SubString("arnear", 5, 6), s)
+end
+
+@testset "LempelZivDict" begin
+    s = LempelZivDict("arn")
+    @test s.n == 3
+    @test in(SubString("arne", 1, 1), s)
+    @test in(SubString("arne", 2, 2), s)
+    @test in(SubString("arne", 3, 3), s)
+
+    d = LempelZivDict("arnea")
+    @test d.n == 4
+    @test in(SubString("arne", 1, 1), d)
+    @test in(SubString("arne", 2, 2), d)
+    @test in(SubString("arne", 3, 3), d)
+    @test in(SubString("arne", 4, 4), d)
+    @test d[SubString("arne", 4, 4)] == 1
+    @test d["e"] == 1
+    @test d["n"] == 1
+    @test d["r"] == 1
+    @test d["a"] == 2
+
+    d2 = LempelZivDict("arnea", false)
+    @test d2["e"] == 1
+    @test d2["n"] == 1
+    @test d2["r"] == 1
+    @test d2["a"] == 1
 end

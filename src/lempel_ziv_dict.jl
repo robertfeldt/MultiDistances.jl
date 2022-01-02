@@ -97,18 +97,22 @@ end
 
 struct LempelZivDict{G} <: LempelZivGrams{G}
     n::Int
+    countpre::Bool
     lzdict::Dict{G,Int}
 end
 Base.in(g::G, lzd::LempelZivDict{G}) where {G} = haskey(lzd.lzdict, g)
 
-function LempelZivDict(s::S) where {S<:AbstractString}
-    lzi = LempelZivDictIterator(s)
+function LempelZivDict(s::S, countpre::Bool = true) where {S<:AbstractString}
+    lzi = LempelZivDictIterator(s, countpre)
     n = iterate!(lzi)
-    LempelZivDict{eltype(lzi)}(n, lzi.lzdict)
+    LempelZivDict{eltype(lzi)}(n, countpre, lzi.lzdict)
 end
 
 Base.getindex(lz::LempelZivIterator{S,SS}, g::SS) where {S,SS} =
     lz.lzdict[g]
+Base.getindex(d::LempelZivDict{G}, g::G) where {G} = d.lzdict[g]
+Base.getindex(d::LempelZivDict{SubString{S}}, g::S) where {S<:AbstractString} = 
+    d.lzdict[SubString(g, 1, length(g))]
 
 substr(s::String) = SubString(s, 1, length(s))
 Base.getindex(lz::LempelZivIterator{String,SubString{String}}, g::String) =
