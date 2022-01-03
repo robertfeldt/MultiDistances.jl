@@ -1,5 +1,6 @@
 using MultiDistances: lempel_ziv_jaccard_distance, faster_lempel_ziv_jaccard_distance
 using MultiDistances: probability_jaccard_distance, LempelZivDict
+using MultiDistances: ProbabilityJaccard, precalc
 
 @testset "lempel_ziv_jaccard_distance" begin
     s1 = LempelZivSet("arnear") # a, r, n, e, ar
@@ -30,4 +31,11 @@ end
     s1, s2 = "arne", "arnearne"
     d1, d2 = LempelZivDict(s1), LempelZivDict(s2)
     @test probability_jaccard_distance(d1, d2) == probability_jaccard_distance(s1, s2)
+end
+
+@testset "ProbabilityJaccard distance" begin
+    d = ProbabilityJaccard()
+    s1, s2 = "arne", "arnearne"
+    @test evaluate(d, s1, s2) == probability_jaccard_distance(s1, s2)
+    @test isa(precalc(d, s1), LempelZivDict)
 end

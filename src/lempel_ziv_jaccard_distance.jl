@@ -1,3 +1,16 @@
+# Prep for integration with StringDistances type hierarchy:
+abstract type StringSemiMetric <: Distances.SemiMetric end
+abstract type AbstractGramDistance <: StringSemiMetric end
+# Ideally we will want AbstractQGramDistance <: AbstractGramDistance
+# and change the QGramDict methods in StringDistances to use
+# AbstractGramCounts which LempelZivDict subtypes.
+
+struct ProbabilityJaccard <: AbstractGramDistance
+	countpre::Bool
+end
+ProbabilityJaccard(countpre::Bool = true) = ProbabilityJaccard(countpre)
+precalc(d::ProbabilityJaccard, g::G) where {G} = LempelZivDict(g, d.countpre)
+
 lempel_ziv_jaccard_distance(s1::Set{G}, s2::Set{G}) where {G} =
     1.0 - (length(intersect(s1, s2)) / length(union(s1, s2)))
 
@@ -58,6 +71,14 @@ function probability_jaccard_similarity(x::Dict{K,R}, y::Dict{K,R}) where {K,R<:
     return jsim
 end
 
+function (dist::ProbabilityJaccard)(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
+    probability_jaccard_distance(d1.lzdict, d2.lzdict)    
+end
+
+function (dist::ProbabilityJaccard)(s1::S, s2::S) where {S<:AbstractString}
+    probability_jaccard_distance(precalc(dist, s1), precalc(dist, s2))
+end
+
 probability_jaccard_distance(x::Dict{K,R}, y::Dict{K,R}) where {K,R<:Real} =
     1.0 - probability_jaccard_similarity(x, y)
 
@@ -66,3 +87,5 @@ probability_jaccard_distance(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {
 
 probability_jaccard_distance(s1::S, s2::S) where {S<:AbstractString} =
     probability_jaccard_distance(LempelZivDict(s1), LempelZivDict(s2))
+
+precalc_probjaccard(s::S) where {S<:AbstractString} = LempelZivDict(s)
