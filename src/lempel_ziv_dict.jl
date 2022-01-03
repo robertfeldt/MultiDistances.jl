@@ -101,6 +101,10 @@ mutable struct LempelZivDict{G} <: LempelZivGrams{G}
     lzdict::Dict{G,Int}
 end
 Base.in(g::G, lzd::LempelZivDict{G}) where {G} = haskey(lzd.lzdict, g)
+Base.in(s::S, lzd::LempelZivDict{SubString{S}}) where {S<:AbstractString} = 
+    haskey(lzd.lzdict, substr(s))
+
+substr(s::String) = SubString(s, 1, length(s))
 
 function LempelZivDict(s::S, countpre::Bool = true) where {S<:AbstractString}
     lzi = LempelZivDictIterator(s, countpre)
@@ -112,17 +116,28 @@ Base.getindex(lz::LempelZivIterator{S,SS}, g::SS) where {S,SS} =
     lz.lzdict[g]
 Base.getindex(d::LempelZivDict{G}, g::G) where {G} = d.lzdict[g]
 Base.getindex(d::LempelZivDict{SubString{S}}, g::S) where {S<:AbstractString} = 
-    d.lzdict[SubString(g, 1, length(g))]
-
-substr(s::String) = SubString(s, 1, length(s))
+    d.lzdict[substr(g)]
 Base.getindex(lz::LempelZivIterator{String,SubString{String}}, g::String) =
     lz.lzdict[substr(g)]
 
-function update!(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
+function add!(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
     for (g, c) in d2.lzdict
         d1.lzdict[g] = get(d1.lzdict, g, 0) + c
     end
     d1.n += d2.n
+    return d1
+end
+
+function subtract!(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
+    for (g, c) in d2.lzdict
+        if haskey(d1.lzdict, g)
+            d1.lzdict[g] -= c
+            if d1.lzdict[g] < 1
+                delete!(d1.lzdict, g)
+            end
+        end
+    end
+    d1.n -= d2.n
     return d1
 end
 

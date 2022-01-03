@@ -1,5 +1,5 @@
 using MultiDistances: lzgrams, LempelZivDictIterator, LempelZivSetIterator
-using MultiDistances: LempelZivSet, LempelZivDict, update!
+using MultiDistances: LempelZivSet, LempelZivDict, add!, subtract!
 
 sameset(it1, it2) = sort(collect(it1)) == sort(collect(it2))
 
@@ -96,15 +96,35 @@ end
     @test d2["a"] == 1
 end
 
-@testset "update and merge LempelZivDicts" begin
+@testset "add and subtract LempelZivDicts" begin
     d1 = LempelZivDict("arn") # a 1, r 1, n 1
     orignd1 = d1.n
     d2 = LempelZivDict("arnear") # a 2, r 1, n 1, e 1, ar 1
-    update!(d1, d2)
+
+    add!(d1, d2)
     @test d1.n == (orignd1 + d2.n)
     @test d1["a"] == 3
     @test d1["r"] == 2
     @test d1["n"] == 2
+    @test d1["e"] == 1
+    @test d1["ar"] == 1
+
+    subtract!(d1, d2)
+    @test d1.n == orignd1
+    @test d1["a"] == 1
+    @test d1["r"] == 1
+    @test d1["n"] == 1
+    @test !in("e", d1)
+    @test !in("ar", d1)
+
+    od1 = deepcopy(d1)
+    add!(d1, d2)
+    subtract!(d1, od1)
+    # d1 + d2 - d1 should be d2:
+    @test d1.n == d2.n
+    @test d1["a"] == 2
+    @test d1["r"] == 1
+    @test d1["n"] == 1
     @test d1["e"] == 1
     @test d1["ar"] == 1
 end
