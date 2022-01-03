@@ -95,7 +95,7 @@ function LempelZivSet(s::S) where {S<:AbstractString}
     LempelZivSet{eltype(lzi)}(n, lzi.lzset)
 end
 
-struct LempelZivDict{G} <: LempelZivGrams{G}
+mutable struct LempelZivDict{G} <: LempelZivGrams{G}
     n::Int
     countpre::Bool
     lzdict::Dict{G,Int}
@@ -117,7 +117,15 @@ Base.getindex(d::LempelZivDict{SubString{S}}, g::S) where {S<:AbstractString} =
 substr(s::String) = SubString(s, 1, length(s))
 Base.getindex(lz::LempelZivIterator{String,SubString{String}}, g::String) =
     lz.lzdict[substr(g)]
-    
+
+function update!(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
+    for (g, c) in d2.lzdict
+        d1.lzdict[g] = get(d1.lzdict, g, 0) + c
+    end
+    d1.n += d2.n
+    return d1
+end
+
 #function lempelzivset(s::S) where {S<:AbstractString}
 #    lzset = Set{SubString{S}}()
 #    starti, endi = 1, 2
