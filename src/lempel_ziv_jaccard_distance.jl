@@ -1,14 +1,12 @@
-# Prep for integration with StringDistances type hierarchy:
-abstract type StringSemiMetric <: Distances.SemiMetric end
-abstract type AbstractGramDistance <: StringSemiMetric end
-# Ideally we will want AbstractQGramDistance <: AbstractGramDistance
-# and change the QGramDict methods in StringDistances to use
-# AbstractGramCounts which LempelZivDict subtypes.
+abstract type AbstractGramDistance <: Distances.SemiMetric end
+
+precalculate(dist::AbstractGramDistance, s::AbstractString) =
+    LempelZivDict(s)
 
 struct ProbabilityJaccard <: AbstractGramDistance
 	countpre::Bool
+    ProbabilityJaccard(countpre::Bool = true) = new(countpre)
 end
-ProbabilityJaccard(countpre::Bool = true) = ProbabilityJaccard(countpre)
 precalc(d::ProbabilityJaccard, g::G) where {G} = LempelZivDict(g, d.countpre)
 
 lempel_ziv_jaccard_distance(s1::Set{G}, s2::Set{G}) where {G} =
@@ -88,4 +86,8 @@ probability_jaccard_distance(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {
 probability_jaccard_distance(s1::S, s2::S) where {S<:AbstractString} =
     probability_jaccard_distance(LempelZivDict(s1), LempelZivDict(s2))
 
-precalc_probjaccard(s::S) where {S<:AbstractString} = LempelZivDict(s)
+(d::ProbabilityJaccard)(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G} =
+    probability_jaccard_distance(d1, d2)
+
+(d::ProbabilityJaccard)(d1::StringDistances.QGramDict, d2::StringDistances.QGramDict) =
+    probability_jaccard_distance(d1.counts, d2.counts)

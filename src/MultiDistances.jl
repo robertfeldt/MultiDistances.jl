@@ -1,7 +1,8 @@
 module MultiDistances
 
 using Distances
-import StringDistances: PreMetric, compare, evaluate, Levenshtein
+import StringDistances: PreMetric, compare, evaluate, Levenshtein,
+    AbstractQGramDistance, eval_start, eval_op, eval_end
 using CodecZlib, CodecXz, CodecZstd, CodecBzip2, CodecLz4, TranscodingStreams
 
 export file_distance, file_similarity,
@@ -20,5 +21,7 @@ include("diversity_sequence.jl")
 
 include("lempel_ziv_dict.jl")
 include("lempel_ziv_jaccard_distance.jl")
+
+include("interface_StringDistances.jl")
 
 end

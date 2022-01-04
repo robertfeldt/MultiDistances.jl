@@ -38,4 +38,14 @@ end
     s1, s2 = "arne", "arnearne"
     @test evaluate(d, s1, s2) == probability_jaccard_distance(s1, s2)
     @test isa(precalc(d, s1), LempelZivDict)
+
+    d1, d2 = precalc(d, s1), precalc(d, s2)
+    @test d(d1, d2) == probability_jaccard_distance(s1, s2)
+end
+
+@testset "ProbabilityJaccard on QGramDict" begin
+    s1, s2 = "arne", "arnearne"
+    qc1, qc2 = StringDistances.QGramDict(s1, 2), StringDistances.QGramDict(s2, 2)
+    d = ProbabilityJaccard()
+    @test d(qc1, qc2) == probability_jaccard_distance(qc1.counts, qc2.counts)
 end

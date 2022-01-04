@@ -62,6 +62,7 @@ end
 
 @testset "LempelZivSet" begin
     s = LempelZivSet("arnear")
+    @test MultiDistances.hasgramcounts(s) == false
     @test s.n == 5
     @test in(SubString("arnear", 1, 1), s)
     @test in(SubString("arnear", 2, 2), s)
@@ -72,6 +73,7 @@ end
 
 @testset "LempelZivDict" begin
     s = LempelZivDict("arn")
+    @test MultiDistances.hasgramcounts(s) == true
     @test s.n == 3
     @test in(SubString("arn", 1, 1), s)
     @test in(SubString("arn", 2, 2), s)

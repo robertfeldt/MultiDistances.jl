@@ -81,9 +81,25 @@ function iterate!(lz::LempelZivIterator{S,SS}) where {S,SS}
     return n
 end
 
-abstract type LempelZivGrams{G} end
+"""
+    Abstract type at the top of the grams counting type hierarchy.
+    G is the type of the grams and C is either true (iff we also has 
+    the counts of each gram) or false (iff we don't have the counts).
+"""
+abstract type AbstractGramSet{C,G} end
 
-struct LempelZivSet{G} <: LempelZivGrams{G}
+"""
+    True iff a gram set has the counts per gram or only a set of the
+    seen grams.
+"""
+hasgramcounts(gs::AbstractGramSet{C,G}) where {C,G} = C
+
+"""
+    LempelZivGrams represent variable-length grams, typically as SubStrings.
+"""
+abstract type LempelZivGrams{C,G} <: AbstractGramSet{C,G} end
+
+struct LempelZivSet{G} <: LempelZivGrams{false,G}
     n::Int
     lzset::Set{G}
 end
@@ -95,7 +111,7 @@ function LempelZivSet(s::S) where {S<:AbstractString}
     LempelZivSet{eltype(lzi)}(n, lzi.lzset)
 end
 
-mutable struct LempelZivDict{G} <: LempelZivGrams{G}
+mutable struct LempelZivDict{G} <: LempelZivGrams{true,G}
     n::Int
     countpre::Bool
     lzdict::Dict{G,Int}
