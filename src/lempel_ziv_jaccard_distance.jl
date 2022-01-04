@@ -73,10 +73,6 @@ function (dist::ProbabilityJaccard)(d1::LempelZivDict{G}, d2::LempelZivDict{G}) 
     probability_jaccard_distance(d1.lzdict, d2.lzdict)    
 end
 
-function (dist::ProbabilityJaccard)(s1::S, s2::S) where {S<:AbstractString}
-    probability_jaccard_distance(precalc(dist, s1), precalc(dist, s2))
-end
-
 probability_jaccard_distance(x::Dict{K,R}, y::Dict{K,R}) where {K,R<:Real} =
     1.0 - probability_jaccard_similarity(x, y)
 
@@ -91,3 +87,6 @@ probability_jaccard_distance(s1::S, s2::S) where {S<:AbstractString} =
 
 (d::ProbabilityJaccard)(d1::StringDistances.QGramDict, d2::StringDistances.QGramDict) =
     probability_jaccard_distance(d1.counts, d2.counts)
+
+(dist::ProbabilityJaccard)(s1::S, s2::S) where {S<:AbstractString} =
+    probability_jaccard_distance(precalc(dist, s1), precalc(dist, s2))
