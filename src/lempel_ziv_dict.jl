@@ -81,29 +81,12 @@ function iterate!(lz::LempelZivIterator{S,SS}) where {S,SS}
     return n
 end
 
-"""
-    Abstract type at the top of the grams counting type hierarchy.
-    G is the type of the grams and C is either true (iff we also has 
-    the counts of each gram) or false (iff we don't have the counts).
-"""
-abstract type AbstractGramSet{C,G} end
-
-"""
-    True iff a gram set has the counts per gram or only a set of the
-    seen grams.
-"""
-hasgramcounts(gs::AbstractGramSet{C,G}) where {C,G} = C
-
-"""
-    LempelZivGrams represent variable-length grams, typically as SubStrings.
-"""
-abstract type LempelZivGrams{C,G} <: AbstractGramSet{C,G} end
-
-struct LempelZivSet{G} <: LempelZivGrams{false,G}
+struct LempelZivSet{G} <: AbstractGramSet{G}
     n::Int
     lzset::Set{G}
 end
 Base.in(g::G, lzs::LempelZivSet{G}) where {G} = in(g, lzs.lzset)
+grams(lzs::LempelZivSet) = s.lzset
 
 function LempelZivSet(s::S) where {S<:AbstractString}
     lzi = LempelZivSetIterator(s)
@@ -111,51 +94,16 @@ function LempelZivSet(s::S) where {S<:AbstractString}
     LempelZivSet{eltype(lzi)}(n, lzi.lzset)
 end
 
-mutable struct LempelZivDict{G} <: LempelZivGrams{true,G}
-    n::Int
-    countpre::Bool
-    lzdict::Dict{G,Int}
-end
-Base.in(g::G, lzd::LempelZivDict{G}) where {G} = haskey(lzd.lzdict, g)
-Base.in(s::S, lzd::LempelZivDict{SubString{S}}) where {S<:AbstractString} = 
-    haskey(lzd.lzdict, substr(s))
-
-substr(s::String) = SubString(s, 1, length(s))
-
-function LempelZivDict(s::S, countpre::Bool = true) where {S<:AbstractString}
+function lempel_ziv_dict(s::S, countpre::Bool = true) where {S<:AbstractString}
     lzi = LempelZivDictIterator(s, countpre)
     n = iterate!(lzi)
-    LempelZivDict{eltype(lzi)}(n, countpre, lzi.lzdict)
+    GramDict{eltype(lzi)}(n, lzi.lzdict)
 end
 
 Base.getindex(lz::LempelZivIterator{S,SS}, g::SS) where {S,SS} =
     lz.lzdict[g]
-Base.getindex(d::LempelZivDict{G}, g::G) where {G} = d.lzdict[g]
-Base.getindex(d::LempelZivDict{SubString{S}}, g::S) where {S<:AbstractString} = 
-    d.lzdict[substr(g)]
 Base.getindex(lz::LempelZivIterator{String,SubString{String}}, g::String) =
     lz.lzdict[substr(g)]
-
-function add!(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
-    for (g, c) in d2.lzdict
-        d1.lzdict[g] = get(d1.lzdict, g, 0) + c
-    end
-    d1.n += d2.n
-    return d1
-end
-
-function subtract!(d1::LempelZivDict{G}, d2::LempelZivDict{G}) where {G}
-    for (g, c) in d2.lzdict
-        if haskey(d1.lzdict, g)
-            d1.lzdict[g] -= c
-            if d1.lzdict[g] < 1
-                delete!(d1.lzdict, g)
-            end
-        end
-    end
-    d1.n -= d2.n
-    return d1
-end
 
 #function lempelzivset(s::S) where {S<:AbstractString}
 #    lzset = Set{SubString{S}}()
