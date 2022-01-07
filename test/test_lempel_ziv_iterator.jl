@@ -1,5 +1,5 @@
 using MultiDistances: lzgrams, LempelZivDictIterator, LempelZivSetIterator
-using MultiDistances: LempelZivSet, LempelZivDict, add!, subtract!
+using MultiDistances: LempelZivSet, lempel_ziv_dict, add!, subtract!
 
 sameset(it1, it2) = sort(collect(it1)) == sort(collect(it2))
 
@@ -62,7 +62,6 @@ end
 
 @testset "LempelZivSet" begin
     s = LempelZivSet("arnear")
-    @test MultiDistances.hasgramcounts(s) == false
     @test s.n == 5
     @test in(SubString("arnear", 1, 1), s)
     @test in(SubString("arnear", 2, 2), s)
@@ -71,15 +70,14 @@ end
     @test in(SubString("arnear", 5, 6), s)
 end
 
-@testset "LempelZivDict" begin
-    s = LempelZivDict("arn")
-    @test MultiDistances.hasgramcounts(s) == true
+@testset "lempel_ziv_dict" begin
+    s = lempel_ziv_dict("arn")
     @test s.n == 3
     @test in(SubString("arn", 1, 1), s)
     @test in(SubString("arn", 2, 2), s)
     @test in(SubString("arn", 3, 3), s)
 
-    d = LempelZivDict("arnea")
+    d = lempel_ziv_dict("arnea")
     @test d.n == 4
     @test in(SubString("arne", 1, 1), d)
     @test in(SubString("arne", 2, 2), d)
@@ -91,17 +89,17 @@ end
     @test d["r"] == 1
     @test d["a"] == 2
 
-    d2 = LempelZivDict("arnea", false)
+    d2 = lempel_ziv_dict("arnea", false)
     @test d2["e"] == 1
     @test d2["n"] == 1
     @test d2["r"] == 1
     @test d2["a"] == 1
 end
 
-@testset "add and subtract LempelZivDicts" begin
-    d1 = LempelZivDict("arn") # a 1, r 1, n 1
+@testset "add and subtract lempel_ziv_dicts" begin
+    d1 = lempel_ziv_dict("arn") # a 1, r 1, n 1
     orignd1 = d1.n
-    d2 = LempelZivDict("arnear") # a 2, r 1, n 1, e 1, ar 1
+    d2 = lempel_ziv_dict("arnear") # a 2, r 1, n 1, e 1, ar 1
 
     add!(d1, d2)
     @test d1.n == (orignd1 + d2.n)

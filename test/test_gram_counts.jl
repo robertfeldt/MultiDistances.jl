@@ -19,9 +19,13 @@ using StringDistances: qgrams
     @test size(gd) == 6
     @test numsymbols(gd) == 5
     
+    @test gd[g1] == 2
     c = counts(gd)
     @test c[g1] == 2
     for gr in [g2, g3, g4, g5]
+        @test gd[gr] == 1
         @test c[gr] == 1
+        @test in(gr, gd) == true
+        @test in(string(gr), gd) == true
     end
 end

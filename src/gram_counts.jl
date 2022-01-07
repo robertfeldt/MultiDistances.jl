@@ -7,11 +7,36 @@ gramtype(gc::AbstractGramCounts{G}) where {G} = G
 gramtype(gc::Type{AbstractGramCounts{G}}) where {G} = G
 
 Base.size(gc::AbstractGramCounts) = numgrams(gc)
-numgrams(gc::AbstractGramCounts) = 
-    error("numgrams NOT implemented for type $(typeof(gc))")
+numgrams(gc::AbstractGramCounts) = length(grams(gc))
+grams(gc::AbstractGramCounts) =
+    error("grams NOT implemented for type $(typeof(gc))")
 
 numsymbols(gc::AbstractGramCounts) = 
     error("numsymbols NOT implemented for type $(typeof(gc))")
+
+counts(gc::AbstractGramCounts) =
+    error("counts NOT implemented for type $(typeof(gc))")
+
+Base.in(g::G, d::AbstractGramCounts{G}) where {G} = haskey(counts(d), g)
+
+Base.getindex(d::AbstractGramCounts{G}, g::G) where {G} = get(counts(d), g, 0)
+
+substr(s::String) = SubString(s, 1, length(s))
+
+Base.in(g::S, d::AbstractGramCounts{SubString{S}}) where {S<:AbstractString} =
+    haskey(counts(d), substr(g))
+
+Base.getindex(d::AbstractGramCounts{SubString{S}}, g::S) where {S<:AbstractString} =
+    d[substr(g)]
+
+# A GramSet only has the grams and not any counts so they are essentially count 1.
+abstract type AbstractGramSet{G} <: AbstractGramCounts{G} end
+
+grams(gs::AbstractGramSet) =
+    error("grams NOT implemented for type $(typeof(gs))")
+
+Base.in(g::G, d::AbstractGramSet{G}) where {G} = in(g, grams(d))
+Base.getindex(d::AbstractGramSet{G}, g::G) where {G} = in(g, grams(d)) ? 1 : 0
 
 abstract type AbstractGramDict{G} <: AbstractGramCounts{G} end
 
@@ -25,15 +50,29 @@ counts(d::GramDict) = d.counts
 numgrams(d::GramDict) = d.n
 numsymbols(d::GramDict) = length(d.counts)
 
-
-add(gd1::GramDict{G}, gd2::GramDict{G}) where {G} =
-    GramDict{G}(numgrams(gd1)+numgrams(gd2), add(counts(gd1), counts(gd2)))
-
-function add!(gd1::GramDict{G}, gd2::GramDict{G}) where {G}
-    gd1.n += gd2.n
-    add!(gd1.counts, gd2.counts)
-    return gd1
+function add!(d1::GramDict{G}, d2::GramDict{G}) where {G}
+    d1.n += d2.n
+    add!(d1.counts, d2.counts)
+    return d1
 end
+
+add(d1::GramDict{G}, d2::GramDict{G}) where {G} = add!(deepcopy(d1), d2)
+
+function subtract!(d1::GramDict{G}, d2::GramDict{G}) where {G}
+    c1 = counts(d1)
+    for (g, c) in counts(d2)
+        if haskey(c1, g)
+            c1[g] -= c
+            if c1[g] < 1
+                delete!(c1, g)
+            end
+        end
+    end
+    d1.n -= d2.n
+    return d1
+end
+
+subtract(d1::GramDict{G}, d2::GramDict{G}) where {G} = subtract!(deepcopy(d1), d2)
 
 """
     Wrap a QGramDict from StringDistances package, so that it can work
