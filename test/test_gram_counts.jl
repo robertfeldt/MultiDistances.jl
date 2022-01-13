@@ -28,4 +28,13 @@ using StringDistances: qgrams
         @test in(gr, gd) == true
         @test in(string(gr), gd) == true
     end
+
+    # Create another GramDict with the exact same content so we can check equality
+    d2 = Dict(g1 => 2, g2 => 1, g3 => 1, g4 => 1, g5 => 1)    
+    gd2 = GramDict(d2)
+    @test gd == gd2
+
+    d3 = Dict(g1 => 1, g2 => 1, g3 => 1, g4 => 1, g5 => 1)    
+    gd3 = GramDict(d3)
+    @test gd !== gd2
 end

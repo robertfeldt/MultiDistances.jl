@@ -50,6 +50,11 @@ counts(d::GramDict) = d.counts
 numgrams(d::GramDict) = d.n
 numsymbols(d::GramDict) = length(d.counts)
 
+import Base.:(==)
+function Base.:(==)(d1::GramDict{G}, d2::GramDict{G}) where {G}
+    (d1.n == d2.n) && (d1.counts == d2.counts)
+end
+
 function add!(d1::GramDict{G}, d2::GramDict{G}) where {G}
     d1.n += d2.n
     add!(d1.counts, d2.counts)

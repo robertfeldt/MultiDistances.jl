@@ -18,11 +18,14 @@ include("entropy.jl")
 
 include("ncd.jl")
 include("distance_matrix.jl")
-include("diversity_sequence.jl")
 
 include("lempel_ziv_iterator.jl")
 include("lempel_ziv_jaccard_distance.jl")
 include("probability_jaccard_distance.jl")
+
+include("generic_diversity_sequence.jl")
+include("maximum_entropy_sequence.jl")
+include("diversity_sequence.jl") # Should change name of this one!
 
 include("interface_StringDistances.jl")
 
