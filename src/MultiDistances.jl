@@ -14,6 +14,7 @@ export XzCompressor, ZstdCompressor, Bzip2Compressor, LZ4Compressor
 include("utilities.jl")
 include("precalc_string_distances.jl")
 include("gram_counts.jl")
+include("entropy.jl")
 
 include("ncd.jl")
 include("distance_matrix.jl")
