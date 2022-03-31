@@ -10,3 +10,7 @@ Also includes a "binary" command line interface (CLI) for calculating distance (
 # Running from docker file
 
 For ease of use there is a docker file with a command line interface to calculate distances between files. Please see the docker hub readme for details: [mdist CLI on docker hub](https://hub.docker.com/r/robertfeldt/mdist/).
+
+# Acknowledgements
+
+We acknowledge the support from the Swedish Scientific Council ("Vetenskapsrådet") in the projects 2015-04913 and 2020-05272.
